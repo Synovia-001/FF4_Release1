@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="Common\assets\fusion_branding.py" />
     <Compile Include="Common\Branding\fusion_branding.py" />
     <Compile Include="Deploy\Deploy.py" />
@@ -65,6 +66,10 @@
     <Content Include="Common\Branding\SynoviaLogoHor.jpg" />
     <Content Include="Common\Branding\__pycache__\fusion_branding.cpython-314.pyc" />
   </ItemGroup>
+=======
+    <Compile Include="FF4_Release1.py" />
+  </ItemGroup>
+>>>>>>> 42cc6c09d106407cb43386e7168652b50b6b4397
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in

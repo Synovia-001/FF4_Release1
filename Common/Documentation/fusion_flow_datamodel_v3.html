@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fusion Flow — Data Model &amp; Operations Map (rev 3 · TSS Transition API)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1E3D; --navy-2:#0D1B3E; --navy-3:#16294F;
+  --amber:#E0A234; --amber-soft:#F5D9A0; --red:#C8362B; --green:#2E7D5B; --blue:#1E5F8F;
+  --paper:#FFFFFF; --surface:#F4F6FA; --surface-2:#E8ECF4; --line:#D3DAE7;
+  --ink:#152238; --ink-2:#4A5770; --ink-3:#6E7A91; --code-bg:#EEF1F7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --navy:#0B1730; --navy-2:#0D1B3E; --navy-3:#1B2E55;
+    --amber:#E8B255; --amber-soft:#3A2F15; --red:#E4675C; --green:#4FB489; --blue:#5AA7D6;
+    --paper:#0A1326; --surface:#101D38; --surface-2:#16264A; --line:#26365B;
+    --ink:#E4E9F3; --ink-2:#AEBAD0; --ink-3:#8493AE; --code-bg:#13203D;
+  }
+}
+:root[data-theme="dark"]{
+  --navy:#0B1730; --navy-2:#0D1B3E; --navy-3:#1B2E55;
+  --amber:#E8B255; --amber-soft:#3A2F15; --red:#E4675C; --green:#4FB489; --blue:#5AA7D6;
+  --paper:#0A1326; --surface:#101D38; --surface-2:#16264A; --line:#26365B;
+  --ink:#E4E9F3; --ink-2:#AEBAD0; --ink-3:#8493AE; --code-bg:#13203D;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font-family:"Montserrat",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+ font-size:15px;line-height:1.55}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+
+.masthead{background:var(--navy);color:#fff;border-bottom:3px solid var(--amber)}
+.masthead .wrap{padding:34px 20px 30px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--amber);font-weight:700;margin:0 0 10px}
+.masthead h1{margin:0;font-size:clamp(26px,4.2vw,42px);line-height:1.1;font-weight:800;letter-spacing:-.015em}
+.masthead p{margin:12px 0 0;max-width:72ch;color:#C7D2E6;font-size:15px}
+.facts{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px;padding-top:20px;border-top:1px solid rgba(255,255,255,.16)}
+.fact b{display:block;font-size:26px;font-weight:800;color:var(--amber);line-height:1}
+.fact span{font-size:12.5px;color:#AFBDD6}
+
+nav.toc{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding:9px 20px}
+nav.toc a{white-space:nowrap;font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:none;padding:5px 11px;border-radius:14px}
+nav.toc a:hover{background:var(--surface-2);color:var(--ink)}
+nav.toc a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+section{padding:44px 0 4px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{font-size:23px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+h2 .num{color:var(--amber);margin-right:10px}
+h3{font-size:16px;font-weight:700;margin:30px 0 8px}
+h3 .sch{font-family:"JetBrains Mono",monospace;color:var(--amber)}
+.lede{color:var(--ink-2);max-width:82ch;margin:0 0 22px}
+p{max-width:84ch}
+
+.scroll{overflow-x:auto;margin:14px 0 24px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.2px}
+th{background:var(--navy-2);color:#fff;text-align:left;font-weight:600;padding:9px 11px;font-size:12.5px}
+td{padding:8px 11px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:var(--surface)}
+td.mono,th.mono{font-family:"JetBrains Mono",monospace;font-size:12.2px}
+table.tight{font-size:12.4px}
+table.tight th,table.tight td{padding:6px 9px}
+
+.t{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:3px;font-family:"JetBrains Mono",monospace}
+.t-get{background:var(--blue);color:#fff}
+.t-post{background:var(--green);color:#fff}
+.t-w{background:var(--red);color:#fff}
+.t-r{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.t-rw{background:var(--amber);color:#2A1C00}
+.t-new{background:var(--amber);color:#2A1C00}
+.t-bad{background:var(--red);color:#fff}
+.t-ok{background:var(--green);color:#fff}
+.na{color:var(--ink-3)}
+.y{color:var(--green);font-weight:700}
+.n{color:var(--ink-3)}
+
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:14px;margin:18px 0 8px}
+.layer{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.layer header{background:var(--navy);color:#fff;padding:9px 14px;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;gap:10px}
+.layer header em{font-style:normal;color:var(--amber);font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.layer.alt header{background:var(--navy-3)}
+.layer.cli header{background:var(--amber);color:#2A1C00}
+.layer.cli header em{color:#5A3E00}
+.layer ul{list-style:none;margin:0;padding:12px 14px}
+.layer li{padding:6px 0;border-bottom:1px dashed var(--line);font-size:12.8px}
+.layer li:last-child{border-bottom:0}
+.layer li b{font-family:"JetBrains Mono",monospace;font-size:12.2px;font-weight:700;display:block}
+.layer li span{color:var(--ink-3);font-size:11.6px}
+
+pre{background:var(--navy);color:#DDE6F5;padding:16px;border-radius:6px;overflow-x:auto;
+ font-family:"JetBrains Mono",monospace;font-size:12.2px;line-height:1.6;margin:12px 0 22px}
+pre .c{color:#8FA3C4} pre .k{color:var(--amber)} pre .s{color:#8ED3B0} pre .r{color:#E8918A}
+
+.note{border-left:3px solid var(--amber);background:var(--amber-soft);padding:11px 15px;border-radius:0 5px 5px 0;margin:16px 0;font-size:13.2px}
+.note.warn{background:transparent;border:1px solid var(--line);border-left:3px solid var(--red)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.4px;color:var(--ink-2);margin:10px 0 18px}
+footer{background:var(--navy);color:#9FB0CC;font-size:12.3px;padding:26px 0;margin-top:40px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+@media (max-width:640px){table{min-width:560px}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Synovia Digital · Fusion Flow · Solution Design · Revision 3</p>
+    <h1>Data model and operations map</h1>
+    <p>Rebuilt against the <b>TSS Trader Transition API</b> — the Netcompany replacement for the ServiceNow surface. Seven declaration types, OAuth2, agent <code>actAs</code>, and verbs carried in the body as <code>op_type</code>. Supersedes revisions 1 and 2.</p>
+    <div class="facts">
+      <div class="fact"><b>14</b><span>TSS endpoints</span></div>
+      <div class="fact"><b>34</b><span>endpoint × op_type operations</span></div>
+      <div class="fact"><b>7</b><span>declaration types</span></div>
+      <div class="fact"><b>10</b><span>schemas + 1 per client</span></div>
+      <div class="fact"><b>85</b><span>tables</span></div>
+      <div class="fact"><b>133</b><span>choice lists</span></div>
+      <div class="fact"><b>44</b><span>mapped statuses</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#changed">What changed</a>
+  <a href="#surface">TSS surface</a>
+  <a href="#auth">Auth &amp; actAs</a>
+  <a href="#refs">References</a>
+  <a href="#map">Schema map</a>
+  <a href="#cfg">CFG</a>
+  <a href="#ing">ING</a>
+  <a href="#prs">PRS</a>
+  <a href="#stg">STG</a>
+  <a href="#api">API</a>
+  <a href="#client">〈client〉</a>
+  <a href="#exc">EXC · CTL</a>
+  <a href="#status">Statuses</a>
+  <a href="#routes">Routes</a>
+  <a href="#ops">Operations</a>
+  <a href="#matrix">Matrix</a>
+  <a href="#rules">Rules</a>
+  <a href="#ddl">DDL</a>
+  <a href="#decisions">Decisions</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="changed">
+  <h2><span class="num">01</span>What revision 3 changes</h2>
+  <p class="lede">Revisions 1 and 2 were built on the internal Fusion Flow backend spec and the ServiceNow-era TSS API. The transition API is a different product: different host, different auth, different verb model, and a scope that covers every declaration type rather than simplified Route A.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Dimension</th><th>Was (ServiceNow / rev 2)</th><th>Now (Transition API)</th></tr>
+    <tr><td>Host</td><td class="mono">api.tradersupportservice.co.uk/api</td><td class="mono">tt.nc-tss.uk/api/v1/trader_api/transition</td></tr>
+    <tr><td>Auth</td><td>HTTP Basic, re-sent on every call</td><td><b>OAuth2 client credentials</b> → Keycloak realm <code>TSS_Portal</code>, bearer token</td></tr>
+    <tr><td>Verbs</td><td>Endpoint per action</td><td><b>One POST per resource</b>; the action is <code>op_type</code> in the body</td></tr>
+    <tr><td>Goods per consignment</td><td>99</td><td><b>999</b></td></tr>
+    <tr><td>Scope</td><td>ENS · SFD · SDI</td><td>ENS · SFD · SDI · FFD · IMMI/SPIMM · Maritime Inventory Claim · GMR</td></tr>
+    <tr><td>Agency</td><td>account-level</td><td><code>actAs</code> query param on every call + <code>/agent_relationships</code></td></tr>
+    <tr><td>Importer eligibility</td><td>discovered by failure (Rule 13)</td><td><b>pre-checkable</b> — <code>GET /permission_grant</code></td></tr>
+    <tr><td>Choice lists</td><td>cache with varying column names</td><td>133 named lists, one shape, <b>ETag</b> on <code>commodity_code</code></td></tr>
+    <tr><td>Update semantics</td><td>partial</td><td><b>full replace</b> — omitted optional fields are reset to blank</td></tr>
+    <tr><td>Response envelope</td><td><code>result</code> dict-or-list</td><td><code>{result:{reference,status,process_message}}</code> on POST; <code>{result:{…}}</code> on GET</td></tr>
+  </table></div>
+  <div class="note warn"><b>The full-replace update rule drives the whole storage design.</b> Because an update resets any optional field left out, an amendment cannot be a diff. <code>STG</code> must hold a complete document for every entity, and an amend must be assembled from the replica plus the change, never from the change alone. This is the single most consequential line in the new spec.</div>
+</section>
+
+<section id="surface">
+  <h2><span class="num">02</span>The TSS surface — 14 endpoints, 34 operations</h2>
+  <p class="lede">Every write is <code>POST</code> to the resource collection with <code>op_type</code> naming the action. Every read is <code>GET</code> with <code>reference</code> and usually a <code>fields</code> list.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Endpoint</th><th>Object</th><th>create</th><th>update</th><th>submit</th><th>cancel</th><th>other</th><th>GET by</th></tr>
+    <tr><td class="mono">/headers</td><td>ENS declaration header</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="y">✔</td><td class="n">—</td><td class="mono">reference, fields</td></tr>
+    <tr><td class="mono">/consignments</td><td>ENS consignment</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="mono">reference, fields</td></tr>
+    <tr><td class="mono">/goods</td><td>Goods item <small>(all types)</small></td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td><b>delete</b></td><td class="mono">reference + sfd_number | sup_dec_number | ens_number | glr_number</td></tr>
+    <tr><td class="mono">/sfd_headers</td><td>SFD header</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="y">✔</td><td class="n">—</td><td class="mono">reference, fields</td></tr>
+    <tr><td class="mono">/simplified_frontier_declarations</td><td>SFD / EIDR</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td class="mono">reference | consignment_number | sup_dec_number | filter</td></tr>
+    <tr><td class="mono">/supplementary_declarations</td><td>SDI</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td><b>recall</b> · <b>reclassify</b> <small>h1→h8</small></td><td class="mono">reference | sfd_number | filter | date_range | type_code</td></tr>
+    <tr><td class="mono">/full_frontier_declarations</td><td>FFD / Standard</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td class="mono">reference, fields</td></tr>
+    <tr><td class="mono">/internal_market_movement</td><td>IMMI · SPIMM (GLR)</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td><b>reclassify</b> <small>h8→h1</small></td><td class="mono">reference | consignment_number | filter (fields required)</td></tr>
+    <tr><td class="mono">/inventory_claim</td><td>Maritime Inventory Claim</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="mono">reference, fields</td></tr>
+    <tr><td class="mono">/gvms_gmr</td><td>GVMS GMR</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="mono">reference (fields required)</td></tr>
+    <tr><td class="mono">/permission_grant</td><td>Importer eligibility</td colspan="5"><td class="n" colspan="4">read only</td><td class="mono">importer_eori</td></tr>
+    <tr><td class="mono">/agent_relationships</td><td>Who we may act for</td><td class="n" colspan="5">read only</td><td class="mono">—</td></tr>
+    <tr><td class="mono">/choice_values/{field_name}</td><td>Reference lists</td><td class="n" colspan="5">read only</td><td class="mono">field_name, If-None-Match</td></tr>
+    <tr><td class="mono">/dashboard/summary</td><td>Trader counters</td><td class="n" colspan="5">read only</td><td class="mono">—</td></tr>
+  </table></div>
+  <div class="note"><b><code>/goods</code> is shared across every declaration type.</b> One create endpoint serves ENS consignments, SFDs, SDIs, FFDs and IMMIs — the parent is named by <code>consignment_number</code> on write and by the type-specific query parameter on read. That is why <code>PRS.Goods_Item</code> and <code>STG.Goods</code> stay single tables with a parent discriminator rather than one set per type.</div>
+</section>
+
+<section id="auth">
+  <h2><span class="num">03</span>Authentication, tenancy and <code>actAs</code></h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Concern</th><th>Mechanism</th><th>Where it lives</th></tr>
+    <tr><td>Token</td><td>OAuth2 <code>client_credentials</code> POST to <code>auth.tt.nc-tss.uk/realms/TSS_Portal/protocol/openid-connect/token</code>, scope <code>openid roles</code>, credentials in the body</td><td><code>CFG.OAuth_Client</code> → <code>API.Token</code></td></tr>
+    <tr><td>Presentation</td><td><code>Authorization: Bearer &lt;access_token&gt;</code></td><td><code>API.Request.request_headers</code> (redacted)</td></tr>
+    <tr><td>Reuse</td><td>Cached until expiry and auto-refreshed — <b>not</b> re-fetched per call as Basic auth was</td><td><code>API.Token.expires_at</code></td></tr>
+    <tr><td>Acting for a trader</td><td><code>?actAs=&lt;customer_account_sys_id&gt;</code> on any call</td><td><code>CFG.Agent_Relationship.customer_account_sys_id</code></td></tr>
+    <tr><td>Discovering who</td><td><code>GET /agent_relationships</code> → agent_account, customer_account, customer_account_sys_id</td><td>refreshed into <code>CFG.Agent_Relationship</code></td></tr>
+    <tr><td>Importer eligibility</td><td><code>GET /permission_grant?importer_eori=…</code> → <code>eori_registered</code>, <code>access_ukims</code>, <code>ukims_eori</code>, <code>use_tss_simplified_process</code>, <code>can_act_as</code>, <code>private_name</code></td><td><code>CFG.Permission_Grant</code> (cached, TTL)</td></tr>
+  </table></div>
+  <div class="note"><b>Permission grant retires Rule 13 as a guess.</b> The old failure mode — an unregistered importer EORI meaning the SDI silently never generates — is now a pre-flight question with a definitive answer. It belongs in <b>validate</b>, not in production diagnostics: check the EORI before a movement is ever staged, cache the answer, and reject with a reason the operator can act on.</div>
+  <div class="note warn"><b>Primeline is the <code>actAs</code> case.</b> PLE is a carrier/agent, so every PLE call carries the importer's <code>customer_account_sys_id</code>. That makes <code>actAs</code> a property of the <i>movement</i>, not of the client — <code>PRS.Declaration.act_as_sys_id</code> and <code>STG.Submission.act_as_sys_id</code> both carry it, and a submission with a stale or missing value is an authorisation failure, not a data failure.</div>
+</section>
+
+<section id="refs">
+  <h2><span class="num">04</span>Reference formats and envelopes</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Reference</th><th>Format</th><th>Returned by</th><th>Note</th></tr>
+    <tr><td class="mono">declaration_number</td><td class="mono">^ENS[A-Za-z0-9]+$</td><td><code>POST /headers</code></td><td>The ENS header LRN.</td></tr>
+    <tr><td class="mono">consignment_number</td><td class="mono">^DEC[A-Za-z0-9]+$</td><td><code>POST /consignments</code></td><td>The ENS consignment.</td></tr>
+    <tr><td class="mono">sfd_number</td><td class="mono">^DEC[A-Za-z0-9]+$</td><td><code>GET /simplified_frontier_declarations</code></td><td><b>Also DEC-prefixed.</b> A <code>DEC…</code> string no longer identifies a consignment on its own — the entity type must be carried alongside it.</td></tr>
+    <tr><td class="mono">goods_id</td><td class="mono">^[a-fA-F0-9]{32}$</td><td><code>POST /goods</code></td><td>32-hex, still stage-specific: ENS / SFD / SDI / IMMI issue different ids for the same physical line.</td></tr>
+    <tr><td class="mono">movement_reference_number</td><td class="mono">^26XI[A-Z0-9]{14}$</td><td><code>GET /consignments</code> once Authorised</td><td>The CDS MRN.</td></tr>
+    <tr><td class="mono">sup_dec_number · ffd_number · glr_number · icr_number · gmr_lrn · gmr_id</td><td>opaque</td><td>their own endpoints</td><td>Each is the key its <code>op_type</code> payloads require.</td></tr>
+  </table></div>
+<pre><span class="c">POST envelope — every write</span>
+{ "result": { "reference": "<span class="s">DEC…</span>",
+              "status": "<span class="s">created|updated|submitted|reclassified|recalled|cancelled|deleted|error</span>",
+              "process_message": "<span class="s">success</span>" } }
+
+<span class="c">GET envelope</span>          { "result": { "reference": "…", … } }
+<span class="c">Error envelope</span>        { "result": { "status": "…", "process_message": "…", "<span class="r">error_details</span>": "…" } }</pre>
+  <div class="note">The POST <code>status</code> enum is the natural driver for <code>API.Response.result_status</code> and for advancing <code>STG.Submission_Step</code> — a step succeeded when <code>process_message = success</code> and <code>status</code> matches the <code>op_type</code> that was sent. Anything else is a failure with <code>error_details</code> to classify on.</div>
+</section>
+
+<section id="map">
+  <h2><span class="num">05</span>Schema map</h2>
+<pre><span class="c">source                  transform                 send                  truth</span>
+┌──────┐   ┌──────┐   ┌──────┐   ┌──────┐   ┌──────────┐   ┌─────────┐   ┌─────┐
+│ <span class="k">ING</span>  │──▸│ <span class="k">PRS</span>  │──▸│ <span class="k">STG</span>  │──▸│ <span class="k">API</span>  │──▸│ <span class="k">〈client〉</span> │──▸│ <span class="k">CTL/ARC</span> │──▸│ <span class="k">SRV</span> │
+│ raw  │   │canon.│   │payload│  │ TSS  │   │ replica  │   │ status  │   │ BI  │
+└──────┘   └──────┘   └──────┘   └──────┘   └──────────┘   └─────────┘   └─────┘
+                                     │
+                          <span class="s">OAuth2 · actAs · op_type</span>
+    └──────────┴────<span class="s">CFG</span> drives every stage · 133 choice lists · route steps · client rules
+    └──────────┴────<span class="s">EXC</span> execution + transaction spine + field-level audit
+    └──────────┴────<span class="s">LOG</span> technical traces</pre>
+  <div class="layers">
+    <div class="layer"><header><span>CFG</span><em>20 tables</em></header><ul>
+      <li><b>Clients · Environments · OAuth_Client</b><span>Principal, TSS environment, client_id/secret/token_url/scope.</span></li>
+      <li><b>Agent_Relationship · Permission_Grant</b><span>Who we may act for; whether an importer EORI is usable.</span></li>
+      <li><b>Users · Login_Audit · Password_Reset_Tokens</b><span>Fusion Flow identity.</span></li>
+      <li><b>Client_File_Format · Field_Map</b><span>Per-customer layouts. Why ING varies.</span></li>
+      <li><b>Client_Rule · Validation_Rule</b><span>Fixed/fallback values; mandatory and conditional rules per declaration type.</span></li>
+      <li><b>Choice_List · Choice_Values</b><span>133 lists, one shape, ETag per list.</span></li>
+      <li><b>Commodity_Codes · Declaration_Type · Route · Route_Step</b><span>Routes are data: endpoint + op_type + order.</span></li>
+      <li><b>Status_Map</b><span>Every TSS status, what it means to us, and which op_type it permits.</span></li>
+    </ul></div>
+    <div class="layer alt"><header><span>ING</span><em>3 + n per client</em></header><ul>
+      <li><b>File_Load · File_Blob · Load_Row</b><span>Control, original bytes, verbatim rows as JSON.</span></li>
+      <li><b>BKD_Raw_* · PLE_Raw_* · CWF_Raw_*</b><span>Typed per-client tables, added once a layout is stable.</span></li>
+    </ul></div>
+    <div class="layer alt"><header><span>PRS</span><em>26 tables</em></header><ul>
+      <li><b>Declaration + 6 type extensions</b><span>ENS · SFD · SDI · FFD · IMMI · MIC. One spine, type-specific columns beside it.</span></li>
+      <li><b>4 header-level child tables</b><span>PreviousDocument, HolderOfAuthorisation, AdditionDeduction, GuaranteeType.</span></li>
+      <li><b>Consignment · Goods_Item + 9 item child tables</b><span>Goods shared by every type.</span></li>
+      <li><b>GMR + 2 children · Validation_Finding</b><span>Trailer registrations, external contacts.</span></li>
+    </ul></div>
+    <div class="layer alt"><header><span>STG</span><em>5 tables</em></header><ul>
+      <li><b>Submission · Entity · Goods · Step · Payload_Version</b><span>Complete documents, ordered calls, and every version sent.</span></li>
+    </ul></div>
+    <div class="layer alt"><header><span>API</span><em>5 tables</em></header><ul>
+      <li><b>Token · Request · Response</b><span>OAuth cache and full wire capture.</span></li>
+      <li><b>Operation_Catalogue · Etag_Store</b><span>Endpoint × op_type contract; conditional-GET state.</span></li>
+    </ul></div>
+    <div class="layer cli"><header><span>〈client〉</span><em>16 tables each</em></header><ul>
+      <li><b>ENS_Header · Consignment · Goods_Item</b><span>Pulled back from TSS.</span></li>
+      <li><b>SFD_Header · SFD · SDI · SDI_Duty_Line · FFD · IMMI · MIC · GMR</b><span>Every artefact type, including ones TSS generates alone.</span></li>
+      <li><b>Sync_Cursor · Change_Request · Change_History · Divergence</b><span>What we pulled, what we want changed, what TSS holds that we didn't send.</span></li>
+    </ul></div>
+    <div class="layer"><header><span>EXC · LOG · CTL · ARC</span><em>10 tables</em></header><ul>
+      <li><b>EXC.Execution · Transaction · Data_Processing_Enhancement · Exception</b><span>The spine.</span></li>
+      <li><b>CTL.Declaration_Status · Client_Register · Dashboard_Snapshot</b><span>Latest state per movement; the TSS counters, sampled.</span></li>
+      <li><b>LOG · ARC · SRV</b><span>Traces, archive, reporting views.</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="cfg">
+  <h2><span class="num">06</span><span class="sch mono">CFG</span> — configuration and reference</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Purpose</th></tr>
+    <tr><td class="mono">CFG.Clients</td><td class="mono">client_code PK, client_name, client_type, own_eori, active, notes</td><td>BKD direct trader · PLE agent · CWF.</td></tr>
+    <tr><td class="mono">CFG.Environments</td><td class="mono">env_code PK, env_name, base_url, token_url, realm, description, active</td><td class="mono">TT → https://tt.nc-tss.uk/api/v1/trader_api/transition</td></tr>
+    <tr><td class="mono">CFG.OAuth_Client <span class="t t-new">NEW</span></td><td class="mono">client_code + env_code PK, oauth_client_id, oauth_client_secret, scope, token_url, active, last_verified, last_status</td><td>Replaces <code>CFG.Credentials</code>. Basic auth is gone.</td></tr>
+    <tr><td class="mono">CFG.Agent_Relationship <span class="t t-new">NEW</span></td><td class="mono">rel_id PK, client_code, agent_account, customer_account, customer_account_sys_id, active, last_seen_at</td><td>Refreshed from <code>GET /agent_relationships</code>. Supplies <code>actAs</code>.</td></tr>
+    <tr><td class="mono">CFG.Permission_Grant <span class="t t-new">NEW</span></td><td class="mono">importer_eori PK, eori_registered, access_ukims, ukims_eori, use_tss_simplified_process, can_act_as, private_name, checked_at, ttl_expires_at</td><td>Cached answer from <code>GET /permission_grant</code>. Checked at validate, not at submit.</td></tr>
+    <tr><td class="mono">CFG.Declaration_Type <span class="t t-new">NEW</span></td><td class="mono">decl_type PK, endpoint, key_field, header_endpoint, header_key_field, supports_submit, supports_cancel, supports_recall, supports_reclassify, max_goods</td><td>ENS·SFD·SDI·FFD·IMMI·MIC·GMR. <code>max_goods</code> = 999 for consignments.</td></tr>
+    <tr><td class="mono">CFG.Status_Map <span class="t t-new">NEW</span></td><td class="mono">entity_type + tss_status PK, internal_status, is_terminal, is_alertable, allows_update, allows_submit, allows_cancel, allows_recall, allows_reclassify, allows_goods_write, sort_order, source, confirmed_at</td><td>Every TSS status, what it means to us, and which <code>op_type</code> it permits. <code>source</code> = ENUM · OBSERVED · INFERRED. An unmapped value resolves to UNKNOWN and raises a finding.</td></tr>
+    <tr><td class="mono">CFG.Route</td><td class="mono">route_code PK, route_name, decl_types, description, active</td><td>A · B · C · D · standalone SFD · standalone SDI.</td></tr>
+    <tr><td class="mono">CFG.Route_Step</td><td class="mono">route_code + step_no PK, operation, endpoint, http_method, op_type, key_source, required, wait_seconds, depends_on_step, success_status</td><td><b>Routes are data.</b> A new route is rows, not code.</td></tr>
+    <tr><td class="mono">CFG.Choice_List <span class="t t-new">NEW</span></td><td class="mono">list_name PK, supports_etag, etag, last_synced_at, row_count, active</td><td>133 lists. Only <code>commodity_code</code> supports <code>If-None-Match</code>.</td></tr>
+    <tr><td class="mono">CFG.Choice_Values</td><td class="mono">choice_value_id PK, list_name FK, value, name, effective_from, effective_end, commodity_code_length, ordinal, loaded_at</td><td>Effective dating is new — a code valid today may not be next month.</td></tr>
+    <tr><td class="mono">CFG.Choice_Field_Alias</td><td class="mono">field_name PK, list_name FK</td><td><code>*_country</code> → <code>country</code>; <code>type_of_packages</code> → <code>type_of_package</code>; <code>transport_charges</code> → <code>transport_charge</code>.</td></tr>
+    <tr><td class="mono">CFG.Commodity_Codes</td><td class="mono">commodity_code PK, description, digits, declarable, controlled, valid_from, valid_to, loaded_at</td><td>Also reachable as a choice list; keep the table for fast prefix search.</td></tr>
+    <tr><td class="mono">CFG.Client_File_Format · Field_Map</td><td class="mono">format_id, client_code, format_code, file_pattern, sheet_name, header_row, delimiter · map_id, format_id, source_column, canonical_field, alias_priority, transform</td><td>Per-customer layout recognition and mapping.</td></tr>
+    <tr><td class="mono">CFG.Client_Rule</td><td class="mono">rule_no, client_code, decl_type, target_field, rule_type, value, condition_expr, reason, active</td><td>FIXED / FALLBACK / DERIVE, now scoped per declaration type.</td></tr>
+    <tr><td class="mono">CFG.Validation_Rule</td><td class="mono">rule_id PK, decl_type, scope, field, rule_type, condition_expr, movement_type, message, severity</td><td>Mandatory sets differ per type — the FFD required set is not the ENS one.</td></tr>
+    <tr><td class="mono">CFG.Users · Login_Audit · Password_Reset_Tokens · Ingestion_Channel · Application_Parameters</td><td class="mono">as revision 2</td><td>Unchanged.</td></tr>
+  </table></div>
+  <div class="note"><b>Seed <code>CFG.Choice_List</code> with all 133 names.</b> The spec enumerates them, so the sync is a loop over a known list rather than discovery. Two behaviours differ: <code>commodity_code</code> is conditional-GET (store the ETag, expect 304), every other list is a full pull. A 503 on any list is a retry, not an empty list.</div>
+</section>
+
+<section id="ing">
+  <h2><span class="num">07</span><span class="sch mono">ING</span> — landed verbatim, per client</h2>
+  <p class="lede">Unchanged from revision 2 and unaffected by the API change — ingestion is about what customers send us, not what TSS accepts.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Notes</th></tr>
+    <tr><td class="mono">ING.File_Load</td><td class="mono">load_id PK, execution_id, client_code, channel_id, format_id NULL, source_ref, received_at, byte_size, sha256, row_count, status</td><td><code>sha256</code> recognises a re-sent file before parsing.</td></tr>
+    <tr><td class="mono">ING.File_Blob</td><td class="mono">load_id PK/FK, content VARBINARY(MAX) | storage_uri, content_type</td><td>The original. Required to re-validate after a reference refresh.</td></tr>
+    <tr><td class="mono">ING.Load_Row</td><td class="mono">load_row_id PK, load_id FK, row_no, raw_json, movement_key</td><td>Format-agnostic landing — a new client is readable day one.</td></tr>
+    <tr><td class="mono">ING.〈CODE〉_Raw_*</td><td class="mono">+ load_id, row_no, movement_key, execution_id</td><td>Typed tables per principal, added as an optimisation.</td></tr>
+  </table></div>
+  <div class="note">Onboarding remains configuration only: <code>CFG.Clients</code> + <code>Ingestion_Channel</code> + <code>Client_File_Format</code> + <code>Field_Map</code> + <code>OAuth_Client</code>, and for an agent also <code>Agent_Relationship</code>.</div>
+</section>
+
+<section id="prs">
+  <h2><span class="num">08</span><span class="sch mono">PRS</span> — canonical, all seven types</h2>
+  <p class="lede">One declaration spine with a type discriminator and a 1:1 extension table per type. Goods and their nine nested arrays are shared, because <code>/goods</code> is shared.</p>
+<pre>▸ <span class="k">PRS.Declaration</span>  <span class="c">decl_type · movement_key · client_code · act_as_sys_id · status</span>
+   ├ PRS.Decl_ENS · Decl_SFD · Decl_SDI · Decl_FFD · Decl_IMMI · Decl_MIC   <span class="c">1:1 extensions</span>
+   ├ PRS.Header_PreviousDocument · Header_HolderOfAuthorisation
+   ├ PRS.Header_AdditionDeduction · Header_GuaranteeType
+   └ <span class="k">PRS.Consignment</span> ×N                    <span class="c">ENS only; other types are their own parent</span>
+        └ <span class="k">PRS.Goods_Item</span> ×≤<span class="s">999</span>            <span class="c">parent = consignment | sfd | sdi | ffd | immi</span>
+              ├ Goods_AdditionalProcedure     ├ Goods_ItemAddDed
+              ├ Goods_DocumentReference       ├ Goods_NationalAdditionalCode
+              ├ Goods_AdditionalInformation   ├ Goods_TaricAdditionalCode
+              ├ Goods_DetailPreviousDocument  ├ Goods_TaxBase
+              └ Goods_AdditionalParties
+
+  <span class="k">PRS.GMR</span> ├ GMR_TrailerRegistration  └ GMR_ExternalContact
+  <span class="k">PRS.Validation_Finding</span></pre>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Notes</th></tr>
+    <tr><td class="mono">PRS.Declaration</td><td class="mono">prs_declaration_id PK, decl_type, movement_key, client_code, act_as_sys_id NULL, source_load_id FK, execution_id, transaction_id, parent_declaration_id NULL, declaration_choice, declaration_category, status, reject_reason</td><td><code>parent_declaration_id</code> carries ENS→SFD→SDI and consignment→SPIMM. <code>declaration_choice</code> H1/H8 drives reclassification.</td></tr>
+    <tr><td class="mono">PRS.Decl_ENS</td><td class="mono">movement_type, type_of_passive_transport, identity_no_of_transport, nationality_of_transport, conveyance_ref, arrival_date_time, arrival_port, place_of_loading, place_of_unloading, place_of_acceptance_same_as_loading, place_of_acceptance, place_of_delivery_same_as_unloading, place_of_delivery, seal_number, route, transport_charges, carrier_eori, carrier_name/street/city/postcode/country, haulier_eori</td><td>24 fields; 9 required by the API.</td></tr>
+    <tr><td class="mono">PRS.Decl_SFD</td><td class="mono">sfd_parent, goods_description, transport_document_number, controlled_goods, goods_domestic_status, supervising_customs_office, customs_warehouse_identifier, ducr, destination_country, align_ukims, consignor/consignee/importer/exporter blocks, use_importer_sde, generate_sd</td><td>SFD header is a separate object (<code>/sfd_headers</code>, 14 fields).</td></tr>
+    <tr><td class="mono">PRS.Decl_SDI</td><td class="mono">authorisation_type, representation_type, additional_procedure, freight_charge(+currency), insurance(+currency), vat_adjustment(+currency), total_invoice(+currency), exchange_rate, postponed_vat, vat_number, location_of_goods_border/other, total_packages</td><td>55 fields. The valuation block is the post-movement work.</td></tr>
+    <tr><td class="mono">PRS.Decl_FFD</td><td class="mono">declaration_category, method_of_payment, mode_of_transport, inland_mode_of_transport, icr, un_locode, delivery_location_country/town, incoterm, special_authorisation, guarantee_types…</td><td>58 fields. Route C.</td></tr>
+    <tr><td class="mono">PRS.Decl_IMMI</td><td class="mono">glr_number, internal_market, free_circulation_home_uses, declaration_category (IMD/IMZ), mode_of_transport, house_airway_bill, transport_document_reference, transport_document_type, maritime_inventory, icr, location_of_goods_border/other</td><td>Covers both standalone IMMI and SPIMM (attached to an ENS consignment).</td></tr>
+    <tr><td class="mono">PRS.Decl_MIC</td><td class="mono">icr_number, container_number, bill_of_lading, final_destination_location_code, package_count, load_type, cargo_or_consignment, weight</td><td>9 fields, 6 required. Route D.</td></tr>
+    <tr><td class="mono">PRS.Consignment</td><td class="mono">prs_consignment_id PK, prs_declaration_id FK, ordinal, part_no, transport_document_number, trader_reference, goods_description, controlled_goods, goods_domestic_status, container_indicator, no_sfd_reason, internal_market, destination_country, align_ukims, use_importer_sde, generate_SD, buyer_same_as_importer + buyer block, seller_same_as_exporter + seller block, consignor/consignee/importer/exporter blocks, declaration_choice, goods_count</td><td>60 fields. <code>internal_market</code> is the SPIMM hook.</td></tr>
+    <tr><td class="mono">PRS.Goods_Item</td><td class="mono">prs_goods_id PK, parent_type, parent_id, item_number 1–999, commodity_code, goods_description, type_of_packages, number_of_packages, number_of_individual_pieces, package_marks, gross_mass_kg, net_mass_kg, controlled_goods(+type), country_of_origin, country_of_preferential_origin, preference, item_invoice_amount(+currency), procedure_code, additional_procedure_code, taric_code, cus_code, national_additional_code, ni_additional_information_codes, supplementary_units, tax_base_unit/quantity/type, valuation_method, valuation_indicator, invoice_number, nature_of_transaction, statistical_value, payable_tax_amount(+currency), quota_order_number, equipment_number, un_dangerous_goods_code, source_row_from, source_row_to</td><td>47 fields + 9 arrays. <code>parent_type</code> + <code>parent_id</code> is what lets one table serve every declaration type.</td></tr>
+    <tr><td class="mono">PRS.Goods_* (9)</td><td class="mono">…_row_id PK, prs_goods_id FK, ordinal, + type columns</td><td>AdditionalProcedure · DocumentReference · AdditionalInformation · DetailPreviousDocument · ItemAddDed · NationalAdditionalCode · TaricAdditionalCode · TaxBase · AdditionalParties.</td></tr>
+    <tr><td class="mono">PRS.Header_* (4)</td><td class="mono">…_row_id PK, prs_declaration_id FK, ordinal, + type columns</td><td>PreviousDocument (with item identifier for FFD/IMMI) · HolderOfAuthorisation · AdditionDeduction · GuaranteeType.</td></tr>
+    <tr><td class="mono">PRS.GMR + 2 children</td><td class="mono">gmr_lrn, ens_lrn, route_id, is_unaccompanied, vehicle_reg_num · trailer_registration_nums · external_contacts(contact_email)</td><td>GMR children carry their own <code>op_type</code> on write.</td></tr>
+    <tr><td class="mono">PRS.Validation_Finding</td><td class="mono">finding_id PK, prs_declaration_id FK, scope, field, severity, rule_id, message</td><td>Every failing rule collected, not just the first.</td></tr>
+  </table></div>
+</section>
+
+<section id="stg">
+  <h2><span class="num">09</span><span class="sch mono">STG</span> — complete documents, ordered calls</h2>
+  <p class="lede">Because TSS updates are full replaces, STG stores whole documents and keeps every version it ever sent.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Notes</th></tr>
+    <tr><td class="mono">STG.Submission</td><td class="mono">submission_id PK, movement_key, client_code, env_code, route_code, decl_type, prs_declaration_id FK, act_as_sys_id NULL, request_id, submission_kind, status, attempt_count, staged_by, submitted_by, staged_at, submitted_at, execution_id</td><td><code>submission_kind</code> = INITIAL · AMEND · CANCEL · RECALL · RECLASSIFY. An amendment is a new submission, never an edit of the old one.</td></tr>
+    <tr><td class="mono">STG.Entity <span class="t t-new">NEW</span></td><td class="mono">stg_entity_id PK, submission_id FK, entity_type, ordinal, prs_source_id, tss_reference, payload_json, status, last_http_status, message</td><td>Generalises <code>STG.Consignment</code>. <code>entity_type</code> = HEADER · CONSIGNMENT · SFD_HEADER · SFD · SDI · FFD · IMMI · MIC · GMR. <code>payload_json</code> is a <b>complete</b> document.</td></tr>
+    <tr><td class="mono">STG.Goods</td><td class="mono">stg_goods_id PK, stg_entity_id FK, prs_goods_id, item_number, payload_json, tss_goods_id, status, message</td><td>≤999 per parent entity.</td></tr>
+    <tr><td class="mono">STG.Submission_Step</td><td class="mono">step_id PK, submission_id FK, step_no, operation, endpoint, op_type, target_entity_id, status, api_request_id FK, success_status, started_at, ended_at</td><td>Materialised from <code>CFG.Route_Step</code>. <b>Endpoint + op_type live here</b>, so a step is self-describing and replayable.</td></tr>
+    <tr><td class="mono">STG.Payload_Version <span class="t t-new">NEW</span></td><td class="mono">version_id PK, stg_entity_id FK, version_no, payload_json, sent_at, api_request_id</td><td>Every version actually sent. Under full-replace semantics this is the only way to answer "what did that update blank out".</td></tr>
+  </table></div>
+  <div class="note warn"><b>An amendment is assembled, not diffed.</b> Read the current document from the <code>〈client〉</code> replica, apply the change from <code>Change_Request</code>, validate the whole result against <code>CFG.Validation_Rule</code>, write it as a new <code>STG.Entity</code> payload with <code>op_type: update</code>. Sending only the changed fields blanks everything else.</div>
+</section>
+
+<section id="api">
+  <h2><span class="num">10</span><span class="sch mono">API</span> — token, wire capture, ETags</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Notes</th></tr>
+    <tr><td class="mono">API.Token <span class="t t-new">NEW</span></td><td class="mono">token_id PK, client_code, env_code, access_token <i>(encrypted)</i>, token_type, scope, obtained_at, expires_at, last_used_at, status</td><td>Replaces <code>API.Session</code>. Fetch on demand, reuse until expiry, refresh on 401 once before failing.</td></tr>
+    <tr><td class="mono">API.Request</td><td class="mono">api_request_id PK, execution_id, transaction_id, client_code, env_code, act_as_sys_id NULL, endpoint, op_type NULL, http_method, url, query_json, request_headers <i>(Bearer redacted)</i>, request_body, attempt_no, sent_at</td><td><code>op_type</code> is a first-class column — it is the verb, and every retry policy keys on it.</td></tr>
+    <tr><td class="mono">API.Response</td><td class="mono">api_response_id PK, api_request_id FK UQ, http_status, result_reference, result_status, process_message, error_details, response_body, error_class, duration_ms, received_at</td><td>The envelope's three fields are lifted into columns; the body is kept whole.</td></tr>
+    <tr><td class="mono">API.Operation_Catalogue</td><td class="mono">endpoint + op_type PK, decl_type, key_field, required_fields, default_fields, success_status, notes, active</td><td>The 34 operations as data, including which GETs require <code>fields</code>.</td></tr>
+    <tr><td class="mono">API.Etag_Store <span class="t t-new">NEW</span></td><td class="mono">resource PK, etag, last_checked_at, last_status</td><td>Conditional GET state. Today only <code>choice_values/commodity_code</code>; keyed generically so more can be added.</td></tr>
+  </table></div>
+  <div class="note"><b>Error classification moves to a column.</b> <code>error_details</code> is a string; <code>error_class</code> is ours. Seed it from observed failures — <code>AUTH_EXPIRED</code> (refresh once, retry), <code>ACT_AS_DENIED</code> (relationship stale, refresh <code>CFG.Agent_Relationship</code>), <code>EORI_NOT_REGISTERED</code> (re-check permission grant), <code>STATUS_NOT_PERMITTED</code> (the object is past the state that allows this op_type), <code>FIELD_REJECTED</code>, <code>PAST_ARRIVAL</code>. The retry policy then reads from data instead of matching strings in code.</div>
+</section>
+
+<section id="client">
+  <h2><span class="num">11</span><span class="sch mono">〈client〉</span> — the replica</h2>
+  <p class="lede">After submission the API pulls TSS's own record down per principal. The replica is authoritative; STG only records what we sent.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Pulled by</th><th>Notes</th></tr>
+    <tr><td class="mono">BKD.ENS_Header</td><td class="mono">GET /headers?reference=ENS…</td><td>Locked once a consignment under it is submitted.</td></tr>
+    <tr><td class="mono">BKD.Consignment</td><td class="mono">GET /consignments?reference=DEC…</td><td>Carries <code>status</code> and <code>movement_reference_number</code>.</td></tr>
+    <tr><td class="mono">BKD.Goods_Item</td><td class="mono">GET /goods?reference=…&amp;ens_number|sfd_number|sup_dec_number|glr_number</td><td>Stage-specific <code>goods_id</code> — store the parent type with it.</td></tr>
+    <tr><td class="mono">BKD.SFD_Header · BKD.SFD</td><td class="mono">GET /sfd_headers · /simplified_frontier_declarations?consignment_number=DEC…</td><td>The EIDR SFD is auto-generated; we read it.</td></tr>
+    <tr><td class="mono">BKD.SDI · BKD.SDI_Duty_Line</td><td class="mono">GET /supplementary_declarations?sfd_number=… · duty lines</td><td>Duty lines and totals arrive from TSS — never computed here.</td></tr>
+    <tr><td class="mono">BKD.FFD · BKD.IMMI · BKD.MIC</td><td class="mono">their own GETs</td><td>Present whether or not we created them.</td></tr>
+    <tr><td class="mono">BKD.GMR</td><td class="mono">GET /gvms_gmr?reference=…&amp;fields=…</td><td><code>gmr_id</code> readable shortly after submit; <code>fields</code> is required on this GET.</td></tr>
+    <tr><td class="mono">BKD.Dashboard_Snapshot</td><td class="mono">GET /dashboard/summary</td><td>Six counters, sampled on a schedule. An independent check on our own status counts.</td></tr>
+    <tr><td class="mono">BKD.Sync_Cursor</td><td>internal</td><td>Per entity type: last synced, last reference, next due.</td></tr>
+    <tr><td class="mono">BKD.Change_Request · Change_History</td><td>operator / portal</td><td>Intent, then what was applied with the <code>api_request_id</code> that applied it.</td></tr>
+    <tr><td class="mono">BKD.Divergence <span class="t t-new">NEW</span></td><td>internal</td><td>Where the replica and the last sent payload disagree: entity, field, ours, theirs, first_seen. A TSS-portal edit shows up here, and nowhere else.</td></tr>
+  </table></div>
+  <div class="note warn"><b>The dashboard is a reconciliation control, not decoration.</b> <code>supplementaryDeclarationsOverdue</code> and <code>declarationsSubmittedWithErrors</code> come from TSS's own view of the account. If our status counts and theirs disagree, our replica is stale or our submission never landed — either way it is a finding worth alerting on.</div>
+</section>
+
+<section id="exc">
+  <h2><span class="num">12</span><span class="sch mono">EXC</span> · <span class="sch mono">CTL</span> · <span class="sch mono">LOG</span> · <span class="sch mono">ARC</span></h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Table</th><th>Key columns</th><th>Notes</th></tr>
+    <tr><td class="mono">EXC.Execution</td><td class="mono">execution_id PK, transaction_id, process_name, client_code, mode, dry_run, triggered_by, started_at, ended_at, status, rows_in, rows_out</td><td>One row per run.</td></tr>
+    <tr><td class="mono">EXC.Transaction</td><td class="mono">txn_row_id PK, transaction_id, execution_id FK, entity_type, entity_key, from_status, to_status, occurred_at</td><td>One row per stage boundary.</td></tr>
+    <tr><td class="mono">EXC.Data_Processing_Enhancement</td><td class="mono">enh_id PK, transaction_id, movement_key, entity_type, entity_ordinal, field_name, old_value, new_value, rule_no, reason, occurred_at</td><td>Only genuine changes.</td></tr>
+    <tr><td class="mono">EXC.Exception</td><td class="mono">exception_id PK, execution_id FK, stage, severity, movement_key, message, detail</td><td>Stage failures with context.</td></tr>
+    <tr><td class="mono">CTL.Declaration_Status</td><td class="mono">client_code + movement_key PK, current_status, tss_status, control_status, decl_type, declaration_number, consignment_number, sfd_number, sup_dec_number, glr_number, icr_number, ffd_number, mrn, gmr_id, last_event_at, last_execution_id</td><td>One row per movement, every reference it has acquired.</td></tr>
+    <tr><td class="mono">CTL.Client_Register · CTL.Dashboard_Snapshot · LOG.Error_Log · LOG.Event_Log · ARC.Movement_Archive</td><td class="mono">as revision 2</td><td>Dashboard snapshot is cross-client.</td></tr>
+  </table></div>
+</section>
+
+<section id="status">
+  <h2><span class="num">13</span>Status reference</h2>
+  <p class="lede">Statuses come from four places and they are not interchangeable. Two are given by the API, one is ours, and one is pullable as reference data. Confusing them is how a movement ends up looking finished when it is not.</p>
+
+  <div class="scroll"><table class="tight">
+    <tr><th>Source</th><th>What it tells you</th><th>Stored in</th><th>Confidence</th></tr>
+    <tr><td><b>POST result status</b></td><td>Whether the call we just made did what we asked</td><td><code>API.Response.result_status</code></td><td><span class="t t-ok">ENUM PUBLISHED</span></td></tr>
+    <tr><td><b>Entity status</b></td><td>Where the object sits in TSS's own lifecycle</td><td><code>〈client〉.*.tss_status</code></td><td>Published for SFD header, MIC, GMR; <b>free text</b> for the rest</td></tr>
+    <tr><td><b>control_status</b></td><td>Whether customs have selected it for control — a separate axis</td><td><code>〈client〉.*.control_status</code></td><td>Free text, no enum</td></tr>
+    <tr><td><b>Our vocabulary</b></td><td>Where the movement is in <i>our</i> pipeline</td><td><code>EXC.Transaction</code> → <code>CTL.Declaration_Status</code></td><td>Ours to define</td></tr>
+  </table></div>
+
+  <h3>13.1 — POST result status <span class="t t-ok">published enum</span></h3>
+  <p>Eight values on <code>StandardPostResult.status</code>, returned by every write. A step succeeded when this matches the <code>op_type</code> sent <i>and</i> <code>process_message = success</code>.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>op_type sent</th><th>Expected status</th><th>Endpoints</th><th>Reference returned</th></tr>
+    <tr><td class="mono">create</td><td class="mono">created</td><td>headers · consignments · goods · sfd_headers · simplified_frontier_declarations · supplementary_declarations · full_frontier_declarations · internal_market_movement · inventory_claim · gvms_gmr</td><td>the new LRN / 32-hex goods_id</td></tr>
+    <tr><td class="mono">update</td><td class="mono">updated</td><td>all of the above</td><td>the same reference</td></tr>
+    <tr><td class="mono">submit</td><td class="mono">submitted</td><td>consignments · SFD · SDI · FFD · IMMI · MIC · GMR</td><td>the same reference</td></tr>
+    <tr><td class="mono">cancel</td><td class="mono">cancelled</td><td>headers · consignments · sfd_headers · SDI · IMMI · MIC · GMR</td><td>the same reference</td></tr>
+    <tr><td class="mono">delete</td><td class="mono">deleted</td><td>goods only</td><td>the goods_id</td></tr>
+    <tr><td class="mono">recall</td><td class="mono">recalled</td><td>supplementary_declarations only</td><td>sup_dec_number</td></tr>
+    <tr><td class="mono">reclassify</td><td class="mono">reclassified</td><td>supplementary_declarations <small>(h1→h8)</small> · internal_market_movement <small>(h8→h1)</small></td><td>the same reference</td></tr>
+    <tr><td class="na">any</td><td class="mono">error</td><td>all</td><td><code>error_details</code> carries the reason</td></tr>
+  </table></div>
+  <div class="note"><b>Store <code>success_status</code> on the step, don't infer it.</b> <code>CFG.Route_Step.success_status</code> and <code>STG.Submission_Step.success_status</code> hold the expected value per step, so advancing a step is a comparison rather than a branch. A GET step's expected value is an <i>entity</i> status instead — <code>Authorised</code> at Route A steps 5 and 7.</div>
+
+  <h3>13.2 — Entity statuses, per object</h3>
+
+  <p><b>GVMS GMR</b> — <code>gmr_status</code>, 13 values <span class="t t-ok">published enum</span>. The longest lifecycle in the surface and the only one that tracks a physical vehicle.</p>
+<pre><span class="s">Draft</span> ─▸ <span class="s">Queued for Submission</span> ─▸ <span class="s">Submitted</span> ─▸ <span class="s">Processing</span> ─▸ <span class="s">Open</span> ─▸ <span class="s">Checked in</span> ─▸ <span class="s">Embarked</span> ─▸ <span class="s">Completed</span>
+   │                                    ├─▸ <span class="r">Trader Input Required</span>   <span class="c">fixable, returns to Processing</span>
+   │                                    ├─▸ <span class="r">Inspection Required</span>     <span class="c">customs hold at the border</span>
+   │                                    └─▸ <span class="r">Not Finalisable</span>         <span class="c">a linked declaration is not clear</span>
+   └─────────────────────────▸ <span class="r">Pending Cancellation</span> ─▸ <span class="r">Cancelled</span></pre>
+
+  <p><b>Maritime Inventory Claim</b> — <code>status</code>, 10 values <span class="t t-ok">published enum</span>.</p>
+<pre><span class="s">Draft</span> ─▸ <span class="s">In Claiming</span> ─▸ <span class="s">Claimed</span> ─▸ <span class="s">Linked</span> ─▸ <span class="s">Processing</span> ─▸ <span class="s">Customs Cleared</span> ─▸ <span class="s">Released</span>
+   │            └─▸ <span class="r">Input Required</span>
+   └────────────────────────▸ <span class="r">Pending Cancellation</span> ─▸ <span class="r">Cancelled</span></pre>
+
+  <p><b>SFD header</b> — <code>status</code>, 11 values <span class="t t-ok">published enum</span>. Note the duplicated pairs: <code>InputRequired</code> and <code>Trader input required</code>, <code>Authorised</code> and <code>Authorised for movement</code>.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Value</th><th>Meaning</th><th>Terminal</th></tr>
+    <tr><td class="mono">Draft</td><td>Created, not submitted. Fully editable.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Processing</td><td>With TSS/CDS. Do not send anything.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Trader input required</td><td>Rejected back for correction. Editable again.</td><td class="n">no</td></tr>
+    <tr><td class="mono">InputRequired</td><td>Same condition, different casing. <b>Normalise both to one internal value.</b></td><td class="n">no</td></tr>
+    <tr><td class="mono">Authorised</td><td>Accepted. This is the success assertion in the vendor's own test.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Authorised for movement</td><td>Cleared to move. Treat as a superset of Authorised, not a replacement.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Arrived</td><td>Goods arrived; the supplementary leg opens.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Overdue</td><td>Supplementary past its <code>submission_due_date</code>. <b>Alertable.</b></td><td class="n">no</td></tr>
+    <tr><td class="mono">PaymentPending</td><td>Duty outstanding. The state <code>recall</code> exists for.</td><td class="n">no</td></tr>
+    <tr><td class="mono">Closed</td><td>Complete.</td><td class="y">yes</td></tr>
+    <tr><td class="mono">Cancelled</td><td>Withdrawn.</td><td class="y">yes</td></tr>
+  </table></div>
+
+  <p><b>Everything else</b> — ENS header, consignment, SFD, SDI, FFD and IMMI expose <code>status</code> as a free-text string with no published enum. The values below are those the vendor's own collection and spec examples actually use, so they are the ones to seed the map with and widen on first contact.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Entity</th><th>Observed values</th><th>Evidence</th></tr>
+    <tr><td class="mono">Declaration header (ENS)</td><td><code>Draft</code> · <code>Trader Input Required</code> · <code>Authorised</code> · <code>Cancelled</code></td><td>Business-rule note on <code>/consignments</code>; <code>cancel</code> op exists</td></tr>
+    <tr><td class="mono">Consignment (ENS)</td><td><code>Draft</code> · <code>Trader Input Required</code> · <code>Processing</code> · <code>Authorised</code> · <code>Arrived</code> · <code>Cancelled</code></td><td>Vendor E2E test asserts <code>status eq Authorised</code> after submit</td></tr>
+    <tr><td class="mono">SFD (EIDR)</td><td><code>Trader Input Required</code> · <code>Authorised</code></td><td><code>?filter=status=Trader Input Required</code>; E2E asserts <code>Authorised</code></td></tr>
+    <tr><td class="mono">Supplementary (SDI)</td><td><code>Draft</code> · <code>Pending Payment</code> · <code>Overdue</code> · <code>Closed</code></td><td><code>?filter=status=Draft</code>; the <code>recall</code> body comments Pending Payment</td></tr>
+    <tr><td class="mono">IMMI / SPIMM</td><td><code>Trader Input Required</code> · <code>amendment required</code></td><td><code>?filter=status=Trader Input Required</code>; spec parameter example</td></tr>
+    <tr><td class="mono">Full Frontier (FFD)</td><td>not observed</td><td>Read result exposes <code>status</code>, <code>error_code</code>, <code>error_message</code></td></tr>
+    <tr><td class="mono">Goods item</td><td>— none</td><td>Goods have no status; <code>delete</code> is the whole lifecycle</td></tr>
+  </table></div>
+  <div class="note warn"><b>Never hard-code a status string comparison.</b> With free-text statuses, inconsistent casing already visible in the one published enum, and a private beta still moving, an unrecognised value must be stored, surfaced as a finding, and default to "do nothing" — not silently fail a match and leave a movement stuck. <code>CFG.Status_Map</code> exists for exactly this, and an unmapped value is an alert.</div>
+
+  <h3>13.3 — <code>control_status</code> is a different axis</h3>
+  <p>Present on <code>ConsignmentReadResult</code>, <code>SimplifiedDeclarationReadResult</code> and <code>InternalMarketMovementReadResult</code>, alongside and independent of <code>status</code>. It reports customs control and inspection selection. A declaration can be <code>Authorised</code> and still under control — treat it as a second column, never fold it into the first, and surface it on the operator view because it is the thing that stops a truck.</p>
+
+  <h3>13.4 — Error surfaces differ per entity</h3>
+  <p>There is no single error field. Capture all of them or lose the reason.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Entity</th><th>Error fields</th></tr>
+    <tr><td class="mono">Consignment · SFD</td><td><code>error_code</code> + <code>error_message</code></td></tr>
+    <tr><td class="mono">Supplementary (SDI)</td><td><code>error_code</code> + <code>error_message</code> (+ <code>submission_due_date</code>, <code>clear_date_time</code>)</td></tr>
+    <tr><td class="mono">Declaration header · IMMI</td><td><code>error_message</code> only</td></tr>
+    <tr><td class="mono">GMR</td><td><code>error_reason</code></td></tr>
+    <tr><td class="mono">Maritime Inventory Claim</td><td><code>hold_reason</code> + <code>error_text</code></td></tr>
+    <tr><td class="mono">Any call</td><td>envelope <code>error_details</code> + <code>process_message</code></td></tr>
+  </table></div>
+
+  <h3>13.5 — Which <code>op_type</code> is permitted in which status</h3>
+  <p>The spec says only that writes are <i>"only allowed in certain statuses (Draft / Trader Input Required etc.)"</i>. The table below is the working gate — <span class="t t-new">TO CONFIRM</span> against the beta, and held as data in <code>CFG.Status_Map</code> so confirming it is an update, not a release.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Status</th><th>update</th><th>submit</th><th>cancel</th><th>recall</th><th>reclassify</th><th>goods create/update/delete</th></tr>
+    <tr><td class="mono">Draft</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td></tr>
+    <tr><td class="mono">Trader Input Required / InputRequired</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td></tr>
+    <tr><td class="mono">Processing / Queued for Submission</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+    <tr><td class="mono">Authorised / Authorised for movement</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td><td class="n">—</td><td class="y">✔ <small>SDI h1→h8</small></td><td class="n">—</td></tr>
+    <tr><td class="mono">Arrived</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td><td class="n">—</td></tr>
+    <tr><td class="mono">PaymentPending / Pending Payment</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td></tr>
+    <tr><td class="mono">Overdue</td><td class="y">✔</td><td class="y">✔</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✔</td></tr>
+    <tr><td class="mono">Closed / Cancelled / Completed / Released</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+  </table></div>
+  <div class="note"><b>Check the gate before staging, not at submit.</b> An amend raised against a <code>Processing</code> consignment is refused by TSS with an error the operator cannot act on. Read the replica's status first, refuse in validation with a message that names the status and when it will next be actionable.</div>
+
+  <h3>13.6 — Our vocabulary</h3>
+  <p>Ours describes where a movement is in <i>our</i> pipeline; TSS's describes where the object is in theirs. Both are stored, neither is derived from the other.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>Layer</th><th>Status</th><th>Set when</th><th>Next</th></tr>
+    <tr><td rowspan="3" class="mono">ING</td><td class="mono">RECEIVED</td><td><code>ING.File_Load</code> written, before parsing</td><td>INGESTED</td></tr>
+    <tr><td class="mono">INGESTED</td><td>Rows landed and <code>movement_key</code> stamped</td><td>NORMALISED</td></tr>
+    <tr><td class="mono">DUPLICATE</td><td><code>sha256</code> or <code>movement_key</code> already present</td><td class="na">terminal</td></tr>
+    <tr><td rowspan="6" class="mono">PRS</td><td class="mono">NORMALISED</td><td>Field map applied, dates and codes canonicalised</td><td>ENRICHED</td></tr>
+    <tr><td class="mono">ENRICHED</td><td>Client rules and choice values applied; enhancements logged</td><td>CONSTRUCTED</td></tr>
+    <tr><td class="mono">CONSTRUCTED</td><td>Object graph upserted across PRS</td><td>VALIDATED / REJECTED</td></tr>
+    <tr><td class="mono">VALIDATED</td><td>Every rule passed, including permission grant</td><td>STAGED</td></tr>
+    <tr><td class="mono">REJECTED</td><td>One or more findings at ERROR severity</td><td class="na">terminal until re-run</td></tr>
+    <tr><td class="mono">BLOCKED</td><td>Importer EORI not registered, or the target status forbids the op</td><td class="na">terminal until resolved</td></tr>
+    <tr><td rowspan="6" class="mono">STG</td><td class="mono">STAGED</td><td>Complete documents serialised; eligible for submit</td><td>SUBMITTING</td></tr>
+    <tr><td class="mono">SUBMITTING</td><td>Steps materialised, first call sent</td><td>SUBMITTED / *_FAILED</td></tr>
+    <tr><td class="mono">CREATE_FAILED</td><td>Step 1 failed — <b>nothing exists at TSS</b></td><td>safe to recreate</td></tr>
+    <tr><td class="mono">GOODS_FAILED</td><td>A goods call failed — parent exists, items partial</td><td>resume, never recreate</td></tr>
+    <tr><td class="mono">SUBMIT_FAILED</td><td>The submit call failed — everything exists</td><td>resume at the submit step</td></tr>
+    <tr><td class="mono">SUBMITTED</td><td>Every required step returned its <code>success_status</code></td><td>REPLICATED</td></tr>
+    <tr><td rowspan="4" class="mono">〈client〉</td><td class="mono">REPLICATED</td><td>The object has been pulled back from TSS at least once</td><td>tracks TSS</td></tr>
+    <tr><td class="mono">DIVERGED</td><td>Replica disagrees with the last payload we sent</td><td>investigate</td></tr>
+    <tr><td class="mono">AMEND_PENDING</td><td>A change request is raised but not yet staged</td><td>STAGED</td></tr>
+    <tr><td class="mono">CLOSED</td><td>TSS reports a terminal status and nothing is outstanding</td><td class="na">terminal</td></tr>
+  </table></div>
+
+  <h3>13.7 — The crosswalk</h3>
+  <p><code>CTL.Declaration_Status.current_status</code> is ours; <code>tss_status</code> beside it is theirs, verbatim. <code>CFG.Status_Map</code> is the join, and it is data.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>TSS status</th><th>Our status</th><th>Terminal</th><th>Alert</th></tr>
+    <tr><td class="mono">Draft</td><td class="mono">SUBMITTED <small>(created, not submitted)</small></td><td class="n">no</td><td class="n">—</td></tr>
+    <tr><td class="mono">Processing · Queued for Submission</td><td class="mono">SUBMITTED</td><td class="n">no</td><td class="n">—</td></tr>
+    <tr><td class="mono">Trader Input Required · InputRequired · amendment required</td><td class="mono">DIVERGED</td><td class="n">no</td><td class="y">yes — needs an operator</td></tr>
+    <tr><td class="mono">Authorised · Authorised for movement · Customs Cleared</td><td class="mono">REPLICATED</td><td class="n">no</td><td class="n">—</td></tr>
+    <tr><td class="mono">Arrived · Open · Checked in · Embarked</td><td class="mono">REPLICATED</td><td class="n">no</td><td class="n">—</td></tr>
+    <tr><td class="mono">Inspection Required</td><td class="mono">REPLICATED <small>+ control flag</small></td><td class="n">no</td><td class="y">yes — goods held</td></tr>
+    <tr><td class="mono">Not Finalisable</td><td class="mono">DIVERGED</td><td class="n">no</td><td class="y">yes — a linked declaration is not clear</td></tr>
+    <tr><td class="mono">Overdue</td><td class="mono">DIVERGED</td><td class="n">no</td><td class="y">yes — past submission_due_date</td></tr>
+    <tr><td class="mono">PaymentPending · Pending Payment</td><td class="mono">REPLICATED</td><td class="n">no</td><td class="y">yes — duty outstanding</td></tr>
+    <tr><td class="mono">Closed · Completed · Released</td><td class="mono">CLOSED</td><td class="y">yes</td><td class="n">—</td></tr>
+    <tr><td class="mono">Cancelled · Pending Cancellation</td><td class="mono">CLOSED</td><td class="y">yes</td><td class="n">—</td></tr>
+    <tr><td class="mono"><i>unmapped</i></td><td class="mono">UNKNOWN</td><td class="n">no</td><td class="y">yes — new status seen, map it</td></tr>
+  </table></div>
+
+  <h3>13.8 — Statuses are also reference data</h3>
+  <p>Two of the 133 choice lists carry status vocabularies, so the authoritative values can be pulled rather than guessed. Sync them first and reconcile the map against them.</p>
+  <div class="scroll"><table class="tight">
+    <tr><th>List</th><th>Use</th></tr>
+    <tr><td class="mono">GET /choice_values/sd_status</td><td>Supplementary declaration statuses — fills the biggest gap in 13.2</td></tr>
+    <tr><td class="mono">GET /choice_values/declaration_status</td><td>General declaration statuses across types</td></tr>
+    <tr><td class="mono">GET /choice_values/cds_error_codes</td><td>Populates <code>error_code</code> meanings so operators see text, not a code</td></tr>
+    <tr><td class="mono">GET /choice_values/gvms_routes</td><td><code>route_id</code> values for GMR creation</td></tr>
+  </table></div>
+
+  <h3>13.9 — Dates that pair with status</h3>
+  <div class="scroll"><table class="tight">
+    <tr><th>Field</th><th>On</th><th>Why it matters</th></tr>
+    <tr><td class="mono">submission_due_date</td><td>SDI</td><td>The deadline that produces <code>Overdue</code>. Drives the alert, not the status.</td></tr>
+    <tr><td class="mono">clear_date_time</td><td>SDI</td><td>When it actually cleared — the close-out timestamp.</td></tr>
+    <tr><td class="mono">immi_confirmation_date</td><td>IMMI</td><td>When the internal-market claim was confirmed.</td></tr>
+    <tr><td class="mono">date_of_claim</td><td>MIC</td><td>Claim lodged.</td></tr>
+    <tr><td class="mono">arrival_date_time</td><td>ENS header · SFD header · SDI · FFD · IMMI</td><td>Must be future at creation; the gate on everything downstream.</td></tr>
+  </table></div>
+
+  <div class="note"><b>The dashboard is the independent check.</b> <code>GET /dashboard/summary</code> returns TSS's own counts of <code>supplementaryDeclarationsOverdue</code>, <code>declarationsSubmittedWithErrors</code>, <code>movementsAwaitingConfirmationOfArrival</code> and <code>supplementaryDeclarationsAwaitingCompletion</code>. Compare them to the same counts derived from <code>CTL.Declaration_Status</code> on every sweep. A mismatch means our replica is stale or a submission never landed — and it is the only signal that catches a movement we do not know we are missing.</div>
+</section>
+
+<section id="routes">
+  <h2><span class="num">14</span>Routes as data</h2>
+  <p class="lede">Each row is a <code>CFG.Route_Step</code>. Adding Route C or D is inserts, not a release.</p>
+
+  <h3>Route A — TSS Simplified: ENS → EIDR SFD → SDI <small>(confirmed by the vendor's own end-to-end test)</small></h3>
+  <div class="scroll"><table class="tight">
+    <tr><th>#</th><th>Endpoint</th><th>op_type</th><th>Key in</th><th>Captures</th><th>Success</th></tr>
+    <tr><td>1</td><td class="mono">/headers</td><td class="mono">create</td><td class="na">—</td><td class="mono">declaration_number ENS…</td><td class="mono">created</td></tr>
+    <tr><td>2</td><td class="mono">/consignments</td><td class="mono">create</td><td class="mono">declaration_number</td><td class="mono">consignment_number DEC…</td><td class="mono">created</td></tr>
+    <tr><td>3</td><td class="mono">/goods</td><td class="mono">create</td><td class="mono">consignment_number</td><td class="mono">goods_id (32-hex) ×n</td><td class="mono">created</td></tr>
+    <tr><td>4</td><td class="mono">/consignments</td><td class="mono">submit</td><td class="mono">consignment_number</td><td class="na">—</td><td class="mono">submitted</td></tr>
+    <tr><td>5</td><td class="mono">GET /consignments</td><td class="na">—</td><td class="mono">reference</td><td class="mono">status=Authorised, MRN</td><td class="mono">Authorised</td></tr>
+    <tr><td>6</td><td class="mono">GET /simplified_frontier_declarations</td><td class="na">—</td><td class="mono">consignment_number</td><td class="mono">sfd_number DEC…</td><td class="mono">200</td></tr>
+    <tr><td>7</td><td class="mono">GET /simplified_frontier_declarations</td><td class="na">—</td><td class="mono">reference</td><td class="mono">status=Authorised</td><td class="mono">Authorised</td></tr>
+    <tr><td>8</td><td class="mono">/gvms_gmr</td><td class="mono">create</td><td class="mono">ens_lrn, route_id</td><td class="mono">gmr_lrn</td><td class="mono">created</td></tr>
+    <tr><td>9</td><td class="mono">/gvms_gmr</td><td class="mono">submit</td><td class="mono">gmr_lrn</td><td class="na">—</td><td class="mono">submitted</td></tr>
+    <tr><td>10</td><td class="mono">GET /gvms_gmr</td><td class="na">—</td><td class="mono">reference + fields</td><td class="mono">gmr_id, gmr_status</td><td class="mono">200</td></tr>
+    <tr><td>11</td><td class="mono">GET /supplementary_declarations</td><td class="na">—</td><td class="mono">sfd_number</td><td class="mono">sup_dec_number</td><td class="mono">200</td></tr>
+    <tr><td>12</td><td class="mono">GET /goods</td><td class="na">—</td><td class="mono">reference + sup_dec_number</td><td class="mono">new goods_id ×n</td><td class="mono">200</td></tr>
+    <tr><td>13</td><td class="mono">/goods</td><td class="mono">update</td><td class="mono">goods_id</td><td class="na">— <small>valuation block</small></td><td class="mono">updated</td></tr>
+    <tr><td>14</td><td class="mono">/supplementary_declarations</td><td class="mono">submit</td><td class="mono">sup_dec_number</td><td class="na">—</td><td class="mono">submitted</td></tr>
+  </table></div>
+
+  <h3>Other routes</h3>
+  <div class="scroll"><table class="tight">
+    <tr><th>Route</th><th>Sequence</th><th>Notes</th></tr>
+    <tr><td class="mono">B · SPIMM</td><td><code>/consignments</code> create (<code>internal_market=confirmed</code>) → <code>/internal_market_movement</code> create with <code>declaration_number=DEC…</code> → <code>/goods</code> create against <code>glr_number</code> → <code>/internal_market_movement</code> submit</td><td>SPIMM hangs off an ENS consignment. Reclassify <code>h8_to_h1</code> reverts it; <code>h1_to_h8</code> is raised on the SDI side.</td></tr>
+    <tr><td class="mono">B′ · IMMI standalone</td><td><code>/internal_market_movement</code> create (<code>declaration_category=IMD|IMZ</code>) → <code>/goods</code> → submit</td><td>The post-movement recovery path for UKIMS not-at-risk goods.</td></tr>
+    <tr><td class="mono">C · FFD</td><td><code>/full_frontier_declarations</code> create → <code>/goods</code> → submit</td><td>No header object. 58 fields, guarantees and header additions/deductions.</td></tr>
+    <tr><td class="mono">D · Maritime</td><td><code>/inventory_claim</code> create → submit → referenced from IMMI/FFD via <code>maritime_inventory</code></td><td>9 fields. Smallest object in the surface.</td></tr>
+    <tr><td class="mono">SFD standalone</td><td><code>/sfd_headers</code> create → <code>/simplified_frontier_declarations</code> create with <code>sfd_parent</code> → <code>/goods</code> → submit</td><td>Distinct from the auto-generated EIDR SFD read in Route A step 6.</td></tr>
+    <tr><td class="mono">SDI standalone</td><td><code>/supplementary_declarations</code> create (<code>authorisation_type=ukd_sde</code>) → <code>/goods</code> → submit</td><td><code>recall</code> reopens one sitting in Pending Payment.</td></tr>
+  </table></div>
+</section>
+
+<section id="ops">
+  <h2><span class="num">15</span>Operations map — TSS call → our tables</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>Operation</th><th>Reads</th><th>Writes</th></tr>
+    <tr><td class="mono">OAuth token fetch</td><td>CFG.OAuth_Client · CFG.Environments</td><td>API.Token</td></tr>
+    <tr><td class="mono">GET /agent_relationships</td><td>CFG.OAuth_Client</td><td>API.Request/Response · CFG.Agent_Relationship</td></tr>
+    <tr><td class="mono">GET /permission_grant</td><td>PRS.Consignment.importer_eori · CFG.Permission_Grant <small>(cache)</small></td><td>API.Request/Response · CFG.Permission_Grant</td></tr>
+    <tr><td class="mono">GET /choice_values/{list}</td><td>CFG.Choice_List · API.Etag_Store</td><td>API.Request/Response · CFG.Choice_Values · Choice_List.etag · Etag_Store</td></tr>
+    <tr><td class="mono">POST /headers · /sfd_headers</td><td>STG.Entity <small>(HEADER)</small> · CFG.OAuth_Client</td><td>API.Request/Response · STG.Entity.tss_reference · Payload_Version · Step · EXC.Transaction</td></tr>
+    <tr><td class="mono">POST /consignments · /simplified_frontier_declarations · /supplementary_declarations · /full_frontier_declarations · /internal_market_movement · /inventory_claim</td><td>STG.Entity · STG.Submission_Step · CFG.Route_Step</td><td>API.Request/Response · STG.Entity · Payload_Version · Step · EXC.Transaction</td></tr>
+    <tr><td class="mono">POST /goods</td><td>STG.Goods · parent STG.Entity.tss_reference</td><td>API.Request/Response · STG.Goods.tss_goods_id · Step</td></tr>
+    <tr><td class="mono">POST … op_type=submit</td><td>STG.Entity + all child STG.Goods must be SUCCEEDED</td><td>STG.Submission.status · Step · EXC.Transaction · CTL.Declaration_Status</td></tr>
+    <tr><td class="mono">POST … op_type=cancel · recall · reclassify</td><td>〈client〉 replica <small>(current state)</small> · CFG.Validation_Rule</td><td>new STG.Submission <small>(kind)</small> · API.Request/Response · 〈client〉.Change_History</td></tr>
+    <tr><td class="mono">POST /gvms_gmr</td><td>STG.Entity <small>(GMR)</small> · ENS reference</td><td>API.Request/Response · STG.Entity · Step</td></tr>
+    <tr><td class="mono">GET <i>any</i> read</td><td>〈client〉.Sync_Cursor · CTL.Declaration_Status</td><td>API.Request/Response · 〈client〉.* · Sync_Cursor · Divergence · CTL.Declaration_Status</td></tr>
+    <tr><td class="mono">GET /dashboard/summary</td><td class="na">—</td><td>API.Request/Response · CTL.Dashboard_Snapshot</td></tr>
+  </table></div>
+
+  <h3>Fusion Flow's own surface, re-pointed</h3>
+  <div class="scroll"><table class="tight">
+    <tr><th>Route</th><th>What it now does</th></tr>
+    <tr><td class="mono"><span class="t t-post">POST</span> /upload</td><td>Land to ING → normalise/enrich/construct/validate into PRS → serialise complete documents into STG. Validation now includes <b>permission grant</b> for the importer EORI and <b>effective-dated</b> choice values.</td></tr>
+    <tr><td class="mono"><span class="t t-post">POST</span> /submit</td><td>Materialise <code>CFG.Route_Step</code> for the movement's route, then walk the steps: each is an endpoint + op_type, captured in API, advanced in STG.</td></tr>
+    <tr><td class="mono"><span class="t t-post">POST</span> /resume</td><td>Replay from the first non-succeeded <code>STG.Submission_Step</code>. Never recreates an entity that already has a <code>tss_reference</code>.</td></tr>
+    <tr><td class="mono"><span class="t t-post">POST</span> /sync</td><td>Per entity type, per client, driven by <code>Sync_Cursor</code>. Writes the replica and records divergence.</td></tr>
+    <tr><td class="mono"><span class="t t-post">POST</span> /change_request</td><td>Assembles a <b>complete</b> replacement document from the replica plus the change, validates it whole, stages it as an AMEND submission.</td></tr>
+    <tr><td class="mono"><span class="t t-get">GET</span> /validate_header</td><td>Now also <code>GET /permission_grant</code> and an arrival-window check, before anything is staged.</td></tr>
+    <tr><td class="mono"><span class="t t-get">GET</span> /consignment_list · /declaration/{ref}</td><td>Read the replica and <code>CTL.Declaration_Status</code>, never STG.</td></tr>
+    <tr><td class="mono"><span class="t t-get">GET</span> /choice_values</td><td><code>CFG.Choice_Values</code> filtered to rows in effect today.</td></tr>
+  </table></div>
+</section>
+
+<section id="matrix">
+  <h2><span class="num">16</span>Schema × operation matrix</h2>
+  <div class="legend"><span><span class="t t-r">R</span> read</span><span><span class="t t-w">W</span> write</span><span><span class="t t-rw">RW</span> both</span><span class="na">— untouched</span></div>
+  <div class="scroll"><table class="tight">
+    <tr><th>Schema</th><th>auth ×4</th><th>upload</th><th>submit</th><th>resume</th><th>sync</th><th>change_req</th><th>val_hdr</th><th>lists</th><th>ref sync</th></tr>
+    <tr><td class="mono">CFG</td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td><span class="t t-r">R</span></td><td><span class="t t-r">R</span></td><td><span class="t t-r">R</span></td><td><span class="t t-r">R</span></td><td><span class="t t-rw">RW</span></td><td><span class="t t-r">R</span></td><td><span class="t t-rw">RW</span></td></tr>
+    <tr><td class="mono">ING</td><td class="na">—</td><td><span class="t t-rw">RW</span></td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    <tr><td class="mono">PRS</td><td class="na">—</td><td><span class="t t-w">W</span></td><td><span class="t t-r">R</span></td><td class="na">—</td><td class="na">—</td><td><span class="t t-r">R</span></td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    <tr><td class="mono">STG</td><td class="na">—</td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td><span class="t t-r">R</span></td><td><span class="t t-w">W</span></td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    <tr><td class="mono">API</td><td class="na">—</td><td><span class="t t-w">W</span><small>*</small></td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td class="na">—</td><td><span class="t t-rw">RW</span></td><td class="na">—</td><td><span class="t t-rw">RW</span></td></tr>
+    <tr><td class="mono">〈client〉</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td><span class="t t-rw">RW</span></td><td><span class="t t-rw">RW</span></td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    <tr><td class="mono">EXC</td><td class="na">—</td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td class="na">—</td><td class="na">—</td><td><span class="t t-w">W</span></td></tr>
+    <tr><td class="mono">CTL</td><td class="na">—</td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    <tr><td class="mono">LOG</td><td class="na">—</td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td><span class="t t-w">W</span></td><td class="na">—</td><td><span class="t t-w">W</span></td><td class="na">—</td><td><span class="t t-w">W</span></td></tr>
+  </table></div>
+  <p><small>* <code>/upload</code> touches API only for the permission-grant check; it still never creates or submits anything at TSS.</small></p>
+  <p><b>Volume:</b> at 999 goods per consignment, a single submission can generate ~1,002 API request/response pairs. Body capture must be batched and the retention policy set before the first large movement, not after.</p>
+</section>
+
+<section id="rules">
+  <h2><span class="num">17</span>Rules — retired, confirmed, and new</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>#</th><th>Rule</th><th>Status under the transition API</th></tr>
+    <tr><td class="mono">R3</td><td>Movement type <code>3a</code> makes carrier and place fields mandatory</td><td><span class="t t-ok">CONFIRMED</span> <code>carrier_eori</code>, <code>transport_charges</code>, <code>place_of_loading</code>, <code>place_of_unloading</code>, <code>arrival_port</code>, <code>arrival_date_time</code>, <code>identity_no_of_transport</code>, <code>movement_type</code> are all in the required list.</td></tr>
+    <tr><td class="mono">R4</td><td><code>arrival_date_time</code> strict, not past</td><td><span class="t t-ok">CONFIRMED</span> format <code>DD/MM/YYYY HH:mm:ss</code>; the vendor's own test sets now + 60 minutes. Upper bound not stated — retest the 14-day limit.</td></tr>
+    <tr><td class="mono">R9</td><td>Choice-cache column names vary per reference set</td><td><span class="t t-bad">RETIRED</span> one fixed shape: <code>value</code>, <code>name</code>, <code>effective_from</code>, <code>effective_end</code>, <code>commodity_code_length</code>. Drop the INFORMATION_SCHEMA introspection.</td></tr>
+    <tr><td class="mono">R10</td><td><code>goods_domestic_status</code> single char <code>D</code></td><td><span class="t t-ok">CONFIRMED</span> <code>"D"</code> in every vendor sample.</td></tr>
+    <tr><td class="mono">R11</td><td><code>transport_charges = "Y"</code> for BKD</td><td><span class="t t-new">RE-VERIFY</span> the ENS-header sample sends <code>"A"</code>, the SFD-header sample sends <code>"Y"</code>. Pull the <code>transport_charge</code> choice list and confirm before go-live.</td></tr>
+    <tr><td class="mono">R12</td><td><code>arrival_port = GBAUBELBELBEL</code></td><td><span class="t t-new">RE-VERIFY</span> the ENS sample uses <code>GBAUBELBELGVM</code>, the SFD sample <code>GBAUBELBELBEL</code>. Two Belfast codes — confirm which applies per movement type against the <code>port</code> list.</td></tr>
+    <tr><td class="mono">R13</td><td>Unregistered importer → SDI silently never generates</td><td><span class="t t-ok">SOLVED</span> <code>GET /permission_grant</code> answers it in advance. Move the check into validate.</td></tr>
+    <tr><td class="mono">—</td><td>99 goods per consignment</td><td><span class="t t-bad">RETIRED</span> the limit is <b>999</b>. The auto-split threshold and <code>item_number</code> constraint both change.</td></tr>
+    <tr><td class="mono">—</td><td><code>procedure_code</code> excluded from goods GET field lists</td><td><span class="t t-new">RETEST</span> it is a first-class field on <code>GoodsItemCreateUpdateRequest</code>. The old HTTP 400 was a ServiceNow defect and may not carry over.</td></tr>
+    <tr><td class="mono">—</td><td><code>result</code> may be a dict or a list</td><td><span class="t t-new">RETEST</span> the envelope is specified as an object throughout. Keep the defensive handling until proven.</td></tr>
+    <tr><td class="mono">NEW</td><td>Updates are full replaces</td><td>Omitted optional fields reset to blank. Store complete documents; assemble amendments from the replica.</td></tr>
+    <tr><td class="mono">NEW</td><td>Boolean casing is inconsistent</td><td>Schema enums say <code>YES</code>/<code>NO</code>; vendor samples send <code>yes</code>/<code>no</code>. Normalise on write and confirm which the API accepts.</td></tr>
+    <tr><td class="mono">NEW</td><td><code>fields</code> is required on some GETs</td><td><code>/internal_market_movement</code> and <code>/gvms_gmr</code>. Hold the default list in <code>API.Operation_Catalogue</code>.</td></tr>
+    <tr><td class="mono">NEW</td><td><code>sfd_number</code> is DEC-prefixed</td><td>A <code>DEC…</code> reference no longer implies a consignment. Always carry the entity type with the reference.</td></tr>
+    <tr><td class="mono">NEW</td><td>Op is only permitted in certain statuses</td><td>Draft / Trader Input Required etc. Check the replica's status before staging an amend, or the call fails at TSS instead of in validation.</td></tr>
+  </table></div>
+</section>
+
+<section id="ddl">
+  <h2><span class="num">18</span>DDL — new and changed</h2>
+  <p class="lede">Only what revision 3 adds or alters. ING, EXC and the identity tables carry over from revision 2 unchanged.</p>
+<pre><span class="c">-- ============ CFG : auth, agency, eligibility ============</span>
+<span class="k">CREATE TABLE</span> CFG.OAuth_Client (
+  client_code        VARCHAR(10)   <span class="k">NOT NULL</span>,
+  env_code           VARCHAR(10)   <span class="k">NOT NULL</span>,
+  oauth_client_id    VARCHAR(200)  <span class="k">NOT NULL</span>,
+  oauth_client_secret VARBINARY(512) <span class="k">NOT NULL</span>,      <span class="c">-- encrypted at rest</span>
+  scope              VARCHAR(200)  <span class="k">NOT NULL DEFAULT</span> 'openid roles',
+  token_url          NVARCHAR(500) <span class="k">NOT NULL</span>,
+  active             BIT           <span class="k">NOT NULL DEFAULT</span> 1,
+  last_verified      DATETIME2(3)  <span class="k">NULL</span>,
+  last_status        VARCHAR(40)   <span class="k">NULL</span>,
+  <span class="k">CONSTRAINT</span> PK_OAuth <span class="k">PRIMARY KEY</span>(client_code, env_code)
+);
+
+<span class="k">CREATE TABLE</span> CFG.Agent_Relationship (
+  rel_id                   INT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  client_code              VARCHAR(10)  <span class="k">NOT NULL</span>,
+  agent_account            NVARCHAR(200)<span class="k">NOT NULL</span>,
+  customer_account         NVARCHAR(200)<span class="k">NOT NULL</span>,
+  customer_account_sys_id  VARCHAR(64)  <span class="k">NOT NULL</span>,   <span class="c">-- the actAs value</span>
+  active                   BIT          <span class="k">NOT NULL DEFAULT</span> 1,
+  last_seen_at             DATETIME2(3) <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  <span class="k">CONSTRAINT</span> UX_Agent <span class="k">UNIQUE</span>(client_code, customer_account_sys_id)
+);
+
+<span class="k">CREATE TABLE</span> CFG.Permission_Grant (
+  importer_eori              VARCHAR(20) <span class="k">NOT NULL PRIMARY KEY</span>,
+  eori_registered            BIT         <span class="k">NULL</span>,
+  access_ukims               BIT         <span class="k">NULL</span>,
+  ukims_eori                 VARCHAR(30) <span class="k">NULL</span>,
+  use_tss_simplified_process BIT         <span class="k">NULL</span>,
+  can_act_as                 BIT         <span class="k">NULL</span>,
+  private_name               BIT         <span class="k">NULL</span>,
+  checked_at                 DATETIME2(3)<span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  ttl_expires_at             DATETIME2(3)<span class="k">NOT NULL</span>
+);
+
+<span class="c">-- ============ CFG : declaration types and routes as data ============</span>
+<span class="k">CREATE TABLE</span> CFG.Declaration_Type (
+  decl_type          VARCHAR(10)  <span class="k">NOT NULL PRIMARY KEY</span>,   <span class="c">-- ENS SFD SDI FFD IMMI MIC GMR</span>
+  endpoint           VARCHAR(80)  <span class="k">NOT NULL</span>,
+  key_field          VARCHAR(40)  <span class="k">NOT NULL</span>,   <span class="c">-- consignment_number | sfd_number | …</span>
+  header_endpoint    VARCHAR(80)  <span class="k">NULL</span>,
+  header_key_field   VARCHAR(40)  <span class="k">NULL</span>,
+  supports_submit    BIT <span class="k">NOT NULL DEFAULT</span> 1,
+  supports_cancel    BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  supports_recall    BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  supports_reclassify BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  max_goods          INT <span class="k">NOT NULL DEFAULT</span> 999
+);
+
+<span class="k">CREATE TABLE</span> CFG.Route_Step (
+  route_code     VARCHAR(8)   <span class="k">NOT NULL</span>,
+  step_no        INT          <span class="k">NOT NULL</span>,
+  operation      VARCHAR(60)  <span class="k">NOT NULL</span>,
+  endpoint       VARCHAR(80)  <span class="k">NOT NULL</span>,
+  http_method    VARCHAR(8)   <span class="k">NOT NULL</span>,
+  op_type        VARCHAR(20)  <span class="k">NULL</span>,        <span class="c">-- null on GET steps</span>
+  key_source     VARCHAR(60)  <span class="k">NULL</span>,        <span class="c">-- which earlier step's reference feeds this</span>
+  success_status VARCHAR(20)  <span class="k">NULL</span>,        <span class="c">-- created | submitted | Authorised …</span>
+  required       BIT          <span class="k">NOT NULL DEFAULT</span> 1,
+  wait_seconds   INT          <span class="k">NOT NULL DEFAULT</span> 0,
+  depends_on_step INT         <span class="k">NULL</span>,
+  <span class="k">CONSTRAINT</span> PK_RouteStep <span class="k">PRIMARY KEY</span>(route_code, step_no)
+);
+
+<span class="c">-- ============ CFG : the status gate ============</span>
+<span class="k">CREATE TABLE</span> CFG.Status_Map (
+  entity_type        VARCHAR(20)  <span class="k">NOT NULL</span>,   <span class="c">-- HEADER|CONSIGNMENT|SFD|SDI|FFD|IMMI|MIC|GMR</span>
+  tss_status         VARCHAR(60)  <span class="k">NOT NULL</span>,   <span class="c">-- verbatim, casing as TSS sends it</span>
+  internal_status    VARCHAR(24)  <span class="k">NOT NULL</span>,   <span class="c">-- our vocabulary</span>
+  is_terminal        BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  is_alertable       BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_update      BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_submit      BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_cancel      BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_recall      BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_reclassify  BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  allows_goods_write BIT <span class="k">NOT NULL DEFAULT</span> 0,
+  sort_order         INT <span class="k">NULL</span>,
+  source             VARCHAR(10) <span class="k">NOT NULL</span>,    <span class="c">-- ENUM | OBSERVED | INFERRED</span>
+  confirmed_at       DATETIME2(3) <span class="k">NULL</span>,
+  <span class="k">CONSTRAINT</span> PK_StatusMap <span class="k">PRIMARY KEY</span>(entity_type, tss_status)
+);
+
+<span class="c">-- seed pattern: published enums first, observed second, inferred last</span>
+<span class="k">INSERT INTO</span> CFG.Status_Map
+  (entity_type, tss_status, internal_status, is_terminal, is_alertable,
+   allows_update, allows_submit, allows_cancel, allows_goods_write, source)
+<span class="k">VALUES</span>
+  ('CONSIGNMENT','Draft',                   'SUBMITTED',  0,0, 1,1,1,1, 'OBSERVED'),
+  ('CONSIGNMENT','Trader Input Required',   'DIVERGED',   0,1, 1,1,1,1, 'OBSERVED'),
+  ('CONSIGNMENT','Processing',              'SUBMITTED',  0,0, 0,0,0,0, 'OBSERVED'),
+  ('CONSIGNMENT','Authorised',              'REPLICATED', 0,0, 0,0,1,0, 'OBSERVED'),
+  ('CONSIGNMENT','Arrived',                 'REPLICATED', 0,0, 0,0,0,0, 'INFERRED'),
+  ('CONSIGNMENT','Cancelled',               'CLOSED',     1,0, 0,0,0,0, 'INFERRED'),
+  ('GMR','Draft',                           'SUBMITTED',  0,0, 1,1,1,0, 'ENUM'),
+  ('GMR','Queued for Submission',           'SUBMITTED',  0,0, 0,0,1,0, 'ENUM'),
+  ('GMR','Trader Input Required',           'DIVERGED',   0,1, 1,1,1,0, 'ENUM'),
+  ('GMR','Inspection Required',             'REPLICATED', 0,1, 0,0,0,0, 'ENUM'),
+  ('GMR','Not Finalisable',                 'DIVERGED',   0,1, 1,1,1,0, 'ENUM'),
+  ('GMR','Open',                            'REPLICATED', 0,0, 0,0,1,0, 'ENUM'),
+  ('GMR','Checked in',                      'REPLICATED', 0,0, 0,0,0,0, 'ENUM'),
+  ('GMR','Embarked',                        'REPLICATED', 0,0, 0,0,0,0, 'ENUM'),
+  ('GMR','Completed',                       'CLOSED',     1,0, 0,0,0,0, 'ENUM'),
+  ('GMR','Cancelled',                       'CLOSED',     1,0, 0,0,0,0, 'ENUM'),
+  ('SDI','Overdue',                         'DIVERGED',   0,1, 1,1,0,1, 'OBSERVED'),
+  ('SDI','Pending Payment',                 'REPLICATED', 0,1, 0,0,0,0, 'OBSERVED');
+<span class="c">-- … remaining SFD header (11, ENUM), MIC (10, ENUM), SDI, FFD, IMMI rows …</span>
+
+<span class="c">-- resolve a status; an unmapped value is a finding, never a silent no-match</span>
+<span class="k">CREATE VIEW</span> CFG.vw_Status_Resolve <span class="k">AS</span>
+<span class="k">SELECT</span> c.client_code, c.movement_key, c.decl_type, c.tss_status,
+       <span class="k">COALESCE</span>(m.internal_status,'UNKNOWN') <span class="k">AS</span> internal_status,
+       <span class="k">COALESCE</span>(m.is_alertable, 1)        <span class="k">AS</span> is_alertable,
+       <span class="k">CASE WHEN</span> m.entity_type <span class="k">IS NULL THEN</span> 1 <span class="k">ELSE</span> 0 <span class="k">END</span> <span class="k">AS</span> is_unmapped
+<span class="k">FROM</span> CTL.Declaration_Status c
+<span class="k">LEFT JOIN</span> CFG.Status_Map m
+  <span class="k">ON</span> m.entity_type = c.decl_type <span class="k">AND</span> m.tss_status = c.tss_status;
+
+<span class="c">-- ============ CFG : 133 choice lists ============</span>
+<span class="k">CREATE TABLE</span> CFG.Choice_List (
+  list_name      VARCHAR(80)  <span class="k">NOT NULL PRIMARY KEY</span>,
+  supports_etag  BIT          <span class="k">NOT NULL DEFAULT</span> 0,   <span class="c">-- commodity_code only, today</span>
+  etag           VARCHAR(200) <span class="k">NULL</span>,
+  last_synced_at DATETIME2(3) <span class="k">NULL</span>,
+  row_count      INT          <span class="k">NULL</span>,
+  active         BIT          <span class="k">NOT NULL DEFAULT</span> 1
+);
+
+<span class="k">CREATE TABLE</span> CFG.Choice_Values (
+  choice_value_id       BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  list_name             VARCHAR(80)  <span class="k">NOT NULL REFERENCES</span> CFG.Choice_List(list_name),
+  value                 VARCHAR(80)  <span class="k">NOT NULL</span>,
+  name                  NVARCHAR(400)<span class="k">NOT NULL</span>,
+  effective_from        DATE         <span class="k">NULL</span>,
+  effective_end         DATE         <span class="k">NULL</span>,
+  commodity_code_length VARCHAR(10)  <span class="k">NULL</span>,
+  ordinal               INT          <span class="k">NULL</span>,
+  loaded_at             DATETIME2(3) <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME()
+);
+<span class="k">CREATE INDEX</span> IX_Choice_List_Ord <span class="k">ON</span> CFG.Choice_Values(list_name, ordinal, choice_value_id)
+  <span class="k">INCLUDE</span>(value, name, effective_from, effective_end);
+<span class="k">CREATE INDEX</span> IX_Choice_List_Val <span class="k">ON</span> CFG.Choice_Values(list_name, value);
+
+<span class="c">-- ============ PRS : one spine, seven types ============</span>
+<span class="k">CREATE TABLE</span> PRS.Declaration (
+  prs_declaration_id   BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  decl_type            VARCHAR(10)  <span class="k">NOT NULL REFERENCES</span> CFG.Declaration_Type(decl_type),
+  movement_key         VARCHAR(100) <span class="k">NOT NULL</span>,
+  client_code          VARCHAR(10)  <span class="k">NOT NULL</span>,
+  act_as_sys_id        VARCHAR(64)  <span class="k">NULL</span>,        <span class="c">-- agent movements only</span>
+  parent_declaration_id BIGINT      <span class="k">NULL REFERENCES</span> PRS.Declaration(prs_declaration_id),
+  source_load_id       BIGINT       <span class="k">NOT NULL</span>,
+  execution_id         BIGINT       <span class="k">NOT NULL</span>,
+  transaction_id       UNIQUEIDENTIFIER <span class="k">NOT NULL</span>,
+  declaration_choice   VARCHAR(10)  <span class="k">NULL</span>,        <span class="c">-- H1 | H8</span>
+  declaration_category VARCHAR(10)  <span class="k">NULL</span>,        <span class="c">-- IMD | IMZ | IMA</span>
+  status               VARCHAR(24)  <span class="k">NOT NULL DEFAULT</span> 'NORMALISED',
+  reject_reason        NVARCHAR(MAX)<span class="k">NULL</span>,
+  created_at           DATETIME2(3) <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  <span class="k">CONSTRAINT</span> UX_PRS_Decl <span class="k">UNIQUE</span>(client_code, decl_type, movement_key)
+);
+<span class="c">-- PRS.Decl_ENS / Decl_SFD / Decl_SDI / Decl_FFD / Decl_IMMI / Decl_MIC:</span>
+<span class="c">--   prs_declaration_id PK/FK 1:1, plus that type's own columns</span>
+
+<span class="k">CREATE TABLE</span> PRS.Goods_Item (
+  prs_goods_id     BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  parent_type      VARCHAR(20)  <span class="k">NOT NULL</span>,   <span class="c">-- CONSIGNMENT|SFD|SDI|FFD|IMMI</span>
+  parent_id        BIGINT       <span class="k">NOT NULL</span>,
+  item_number      INT          <span class="k">NOT NULL</span>,
+  commodity_code   VARCHAR(10)  <span class="k">NULL</span>,
+  goods_description NVARCHAR(512) <span class="k">NULL</span>,
+  type_of_packages VARCHAR(10)  <span class="k">NULL</span>,
+  number_of_packages INT        <span class="k">NULL</span>,
+  gross_mass_kg    DECIMAL(18,6)<span class="k">NULL</span>,
+  net_mass_kg      DECIMAL(18,6)<span class="k">NULL</span>,
+  country_of_origin VARCHAR(4)  <span class="k">NULL</span>,
+  procedure_code   VARCHAR(10)  <span class="k">NULL</span>,
+  additional_procedure_code VARCHAR(10) <span class="k">NULL</span>,
+  ni_additional_information_codes VARCHAR(40) <span class="k">NULL</span>,
+  item_invoice_amount DECIMAL(18,4) <span class="k">NULL</span>,
+  item_invoice_currency VARCHAR(4)  <span class="k">NULL</span>,
+  <span class="c">-- … remaining 30 scalar fields …</span>
+  source_row_from  INT <span class="k">NULL</span>,
+  source_row_to    INT <span class="k">NULL</span>,
+  <span class="k">CONSTRAINT</span> UX_PRS_Goods <span class="k">UNIQUE</span>(parent_type, parent_id, item_number),
+  <span class="k">CONSTRAINT</span> CK_PRS_Item <span class="k">CHECK</span>(item_number <span class="k">BETWEEN</span> 1 <span class="k">AND</span> 999)   <span class="c">-- was 99</span>
+);
+
+<span class="c">-- ============ STG : complete documents ============</span>
+<span class="k">CREATE TABLE</span> STG.Submission (
+  submission_id     BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  movement_key      VARCHAR(100) <span class="k">NOT NULL</span>,
+  client_code       VARCHAR(10)  <span class="k">NOT NULL</span>,
+  env_code          VARCHAR(10)  <span class="k">NOT NULL</span>,
+  route_code        VARCHAR(8)   <span class="k">NOT NULL</span>,
+  decl_type         VARCHAR(10)  <span class="k">NOT NULL</span>,
+  prs_declaration_id BIGINT      <span class="k">NOT NULL</span>,
+  act_as_sys_id     VARCHAR(64)  <span class="k">NULL</span>,
+  request_id        UNIQUEIDENTIFIER <span class="k">NOT NULL</span>,
+  submission_kind   VARCHAR(16)  <span class="k">NOT NULL DEFAULT</span> 'INITIAL',  <span class="c">-- AMEND|CANCEL|RECALL|RECLASSIFY</span>
+  status            VARCHAR(24)  <span class="k">NOT NULL DEFAULT</span> 'STAGED',
+  attempt_count     INT          <span class="k">NOT NULL DEFAULT</span> 0,
+  staged_by         VARCHAR(100) <span class="k">NULL</span>,
+  submitted_by      VARCHAR(100) <span class="k">NULL</span>,
+  staged_at         DATETIME2(3) <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  submitted_at      DATETIME2(3) <span class="k">NULL</span>,
+  execution_id      BIGINT       <span class="k">NULL</span>
+);
+<span class="k">CREATE INDEX</span> IX_Sub_Req <span class="k">ON</span> STG.Submission(request_id, status);
+
+<span class="k">CREATE TABLE</span> STG.Entity (
+  stg_entity_id    BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  submission_id    BIGINT        <span class="k">NOT NULL REFERENCES</span> STG.Submission(submission_id),
+  entity_type      VARCHAR(20)   <span class="k">NOT NULL</span>,   <span class="c">-- HEADER|CONSIGNMENT|SFD|SDI|FFD|IMMI|MIC|GMR</span>
+  ordinal          INT           <span class="k">NOT NULL DEFAULT</span> 1,
+  prs_source_id    BIGINT        <span class="k">NULL</span>,
+  tss_reference    VARCHAR(40)   <span class="k">NULL</span>,       <span class="c">-- ENS…/DEC…/glr/icr/gmr</span>
+  payload_json     NVARCHAR(MAX) <span class="k">NOT NULL</span>,    <span class="c">-- COMPLETE document, never a diff</span>
+  status           VARCHAR(24)   <span class="k">NOT NULL DEFAULT</span> 'STAGED',
+  last_http_status INT           <span class="k">NULL</span>,
+  message          NVARCHAR(MAX) <span class="k">NULL</span>,
+  <span class="k">CONSTRAINT</span> UX_STG_Entity <span class="k">UNIQUE</span>(submission_id, entity_type, ordinal)
+);
+
+<span class="k">CREATE TABLE</span> STG.Payload_Version (
+  version_id     BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  stg_entity_id  BIGINT        <span class="k">NOT NULL REFERENCES</span> STG.Entity(stg_entity_id),
+  version_no     INT           <span class="k">NOT NULL</span>,
+  payload_json   NVARCHAR(MAX) <span class="k">NOT NULL</span>,
+  api_request_id BIGINT        <span class="k">NULL</span>,
+  sent_at        DATETIME2(3)  <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  <span class="k">CONSTRAINT</span> UX_PayloadVer <span class="k">UNIQUE</span>(stg_entity_id, version_no)
+);
+
+<span class="k">CREATE TABLE</span> STG.Submission_Step (
+  step_id          BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  submission_id    BIGINT       <span class="k">NOT NULL REFERENCES</span> STG.Submission(submission_id),
+  step_no          INT          <span class="k">NOT NULL</span>,
+  operation        VARCHAR(60)  <span class="k">NOT NULL</span>,
+  endpoint         VARCHAR(80)  <span class="k">NOT NULL</span>,
+  op_type          VARCHAR(20)  <span class="k">NULL</span>,
+  target_entity_id BIGINT       <span class="k">NULL</span>,
+  success_status   VARCHAR(20)  <span class="k">NULL</span>,
+  status           VARCHAR(20)  <span class="k">NOT NULL DEFAULT</span> 'PENDING',
+  api_request_id   BIGINT       <span class="k">NULL</span>,
+  started_at       DATETIME2(3) <span class="k">NULL</span>,
+  ended_at         DATETIME2(3) <span class="k">NULL</span>
+);
+
+<span class="c">-- ============ API : OAuth + wire ============</span>
+<span class="k">CREATE TABLE</span> API.Token (
+  token_id     BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  client_code  VARCHAR(10)   <span class="k">NOT NULL</span>,
+  env_code     VARCHAR(10)   <span class="k">NOT NULL</span>,
+  access_token VARBINARY(MAX)<span class="k">NOT NULL</span>,       <span class="c">-- encrypted</span>
+  token_type   VARCHAR(20)   <span class="k">NOT NULL DEFAULT</span> 'Bearer',
+  scope        VARCHAR(200)  <span class="k">NULL</span>,
+  obtained_at  DATETIME2(3)  <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  expires_at   DATETIME2(3)  <span class="k">NOT NULL</span>,
+  last_used_at DATETIME2(3)  <span class="k">NULL</span>,
+  status       VARCHAR(20)   <span class="k">NOT NULL DEFAULT</span> 'ACTIVE'
+);
+<span class="k">CREATE INDEX</span> IX_Token_Live <span class="k">ON</span> API.Token(client_code, env_code, expires_at <span class="k">DESC</span>);
+
+<span class="k">CREATE TABLE</span> API.Request (
+  api_request_id  BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  execution_id    BIGINT        <span class="k">NULL</span>,
+  transaction_id  UNIQUEIDENTIFIER <span class="k">NULL</span>,
+  client_code     VARCHAR(10)   <span class="k">NOT NULL</span>,
+  env_code        VARCHAR(10)   <span class="k">NOT NULL</span>,
+  act_as_sys_id   VARCHAR(64)   <span class="k">NULL</span>,
+  endpoint        VARCHAR(80)   <span class="k">NOT NULL</span>,
+  op_type         VARCHAR(20)   <span class="k">NULL</span>,
+  http_method     VARCHAR(8)    <span class="k">NOT NULL</span>,
+  url             NVARCHAR(1000)<span class="k">NOT NULL</span>,
+  query_json      NVARCHAR(MAX) <span class="k">NULL</span>,
+  request_headers NVARCHAR(MAX) <span class="k">NULL</span>,      <span class="c">-- Bearer redacted at write time</span>
+  request_body    NVARCHAR(MAX) <span class="k">NULL</span>,
+  attempt_no      INT           <span class="k">NOT NULL DEFAULT</span> 1,
+  sent_at         DATETIME2(3)  <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME()
+);
+
+<span class="k">CREATE TABLE</span> API.Response (
+  api_response_id  BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  api_request_id   BIGINT        <span class="k">NOT NULL UNIQUE REFERENCES</span> API.Request(api_request_id),
+  http_status      INT           <span class="k">NOT NULL</span>,
+  result_reference VARCHAR(40)   <span class="k">NULL</span>,
+  result_status    VARCHAR(30)   <span class="k">NULL</span>,   <span class="c">-- created|updated|submitted|…|error</span>
+  process_message  NVARCHAR(400) <span class="k">NULL</span>,
+  error_details    NVARCHAR(MAX) <span class="k">NULL</span>,
+  error_class      VARCHAR(40)   <span class="k">NULL</span>,   <span class="c">-- ours: AUTH_EXPIRED|ACT_AS_DENIED|…</span>
+  response_body    NVARCHAR(MAX) <span class="k">NULL</span>,
+  duration_ms      INT           <span class="k">NULL</span>,
+  received_at      DATETIME2(3)  <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME()
+);
+
+<span class="k">CREATE TABLE</span> API.Etag_Store (
+  resource        VARCHAR(200) <span class="k">NOT NULL PRIMARY KEY</span>,   <span class="c">-- choice_values/commodity_code</span>
+  etag            VARCHAR(200) <span class="k">NULL</span>,
+  last_checked_at DATETIME2(3) <span class="k">NULL</span>,
+  last_status     INT          <span class="k">NULL</span>            <span class="c">-- 200 | 304</span>
+);
+
+<span class="c">-- ============ 〈client〉 : divergence ============</span>
+<span class="k">CREATE TABLE</span> BKD.Divergence (
+  divergence_id  BIGINT IDENTITY(1,1) <span class="k">PRIMARY KEY</span>,
+  entity_type    VARCHAR(20)   <span class="k">NOT NULL</span>,
+  entity_ref     VARCHAR(40)   <span class="k">NOT NULL</span>,
+  field_name     VARCHAR(100)  <span class="k">NOT NULL</span>,
+  our_value      NVARCHAR(MAX) <span class="k">NULL</span>,      <span class="c">-- last payload we sent</span>
+  tss_value      NVARCHAR(MAX) <span class="k">NULL</span>,      <span class="c">-- what the replica holds</span>
+  first_seen_at  DATETIME2(3)  <span class="k">NOT NULL DEFAULT</span> SYSUTCDATETIME(),
+  resolved_at    DATETIME2(3)  <span class="k">NULL</span>,
+  resolution     VARCHAR(40)   <span class="k">NULL</span>
+);</pre>
+</section>
+
+<section id="decisions">
+  <h2><span class="num">19</span>Decisions</h2>
+  <div class="scroll"><table class="tight">
+    <tr><th>#</th><th>Decision</th><th>Recommendation</th></tr>
+    <tr><td>D1</td><td>Do we build for the transition API only, or run both surfaces during the private beta?</td><td>Both, behind <code>CFG.Environments</code> and <code>API.Operation_Catalogue</code>. The beta is H2 2026 and the ServiceNow surface carries live movements until it isn't.</td></tr>
+    <tr><td>D2</td><td>Which route goes first on the new API?</td><td>Route A against the vendor's own end-to-end test — it is a working, asserted sequence and makes an excellent conformance suite.</td></tr>
+    <tr><td>D3</td><td>Re-verify R11 <code>transport_charges</code> and R12 <code>arrival_port</code>.</td><td>Pull the <code>transport_charge</code> and <code>port</code> choice lists on day one of access. Two Belfast codes appear in vendor samples.</td></tr>
+    <tr><td>D4</td><td>Where does the permission-grant check sit?</td><td>In validate, with a cached answer and a TTL. It is the cheapest test in the pipeline and it retires the most expensive silent failure.</td></tr>
+    <tr><td>D5</td><td>999 goods — do we still split?</td><td>Split at the TSS limit only. The old 99 threshold was a constraint, not a preference, and splitting creates transport-document suffixes that complicate reconciliation.</td></tr>
+    <tr><td>D6</td><td>Retention for <code>API.Request</code>/<code>Response</code> bodies at ~1,000 calls per large submission.</td><td>Full bodies for 90 days, then archive to ARC keeping headers, status and error details. Decide before the first 999-item movement.</td></tr>
+    <tr><td>D7</td><td>Is <code>actAs</code> a client attribute or a movement attribute?</td><td>Movement. PLE acts for many importers; storing it on the client forces one relationship per client schema.</td></tr>
+    <tr><td>D8</td><td>Who owns the 133-list choice sync?</td><td>A scheduled job with per-list state in <code>CFG.Choice_List</code>. Conditional GET on <code>commodity_code</code>, full pull on the rest, and a failed list does not fail the run.</td></tr>
+    <tr><td>D9</td><td>Do we implement reclassification (H1↔H8) in R1?</td><td>Model it now, build it in R2. The columns cost nothing; the workflow needs IMMI to be live first.</td></tr>
+  </table></div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <span>Synovia Digital · Fusion Flow · Data Model &amp; Operations Map · revision 3</span>
+  <span>Source: TSS Trader Transition API OpenAPI 3.0.3 + Bruno collection · tt.nc-tss.uk</span>
+</div></footer>
+
+</body>
+</html>
